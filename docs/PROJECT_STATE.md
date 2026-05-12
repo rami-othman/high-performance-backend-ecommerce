@@ -13,6 +13,7 @@ The future demonstrations will cover concurrent access and data integrity, resou
 - Python 3.11
 - Django
 - Django REST Framework
+- djangorestframework-simplejwt
 - PostgreSQL
 - Redis
 - Celery
@@ -33,12 +34,17 @@ The architecture is a monolithic Django project with separate domain apps. It is
 - `reports`: daily sales report model and Celery task placeholder
 - `performance`: request timing middleware, logs, health, and server-info
 
+JWT authentication is configured with SimpleJWT. API requests use `Authorization: Bearer <access_token>`. Basic authentication is still available for simple manual testing.
+
 ## File Structure
 
 ```text
 high_performance_ecommerce/
 |-- config/
 |   |-- __init__.py
+|   |-- auth_serializers.py
+|   |-- auth_urls.py
+|   |-- auth_views.py
 |   |-- settings.py
 |   |-- urls.py
 |   |-- asgi.py
@@ -100,6 +106,15 @@ high_performance_ecommerce/
 |   |-- urls.py
 |   `-- views.py
 |-- templates/
+|   |-- ui/
+|   |   |-- base.html
+|   |   |-- register.html
+|   |   |-- login.html
+|   |   |-- products.html
+|   |   |-- cart.html
+|   |   |-- orders.html
+|   |   |-- dashboard.html
+|   |   `-- logout.html
 |   |-- base.html
 |   |-- home.html
 |   |-- products.html
@@ -196,6 +211,13 @@ high_performance_ecommerce/
 
 ## Endpoints Created
 
+### Auth API
+
+- `POST /api/auth/register/`
+- `POST /api/auth/token/`
+- `POST /api/auth/token/refresh/`
+- `GET /api/auth/me/`
+
 ### Product API
 
 - `GET /api/products/`
@@ -232,7 +254,17 @@ high_performance_ecommerce/
 
 ### Simple UI
 
-- `/`
+- `/` redirects to `/ui/dashboard/`
+- `/ui/register/`
+- `/ui/login/`
+- `/ui/products/`
+- `/ui/cart/`
+- `/ui/orders/`
+- `/ui/dashboard/`
+- `/ui/logout/`
+
+Legacy simple pages still exist:
+
 - `/products-ui/`
 - `/cart-ui/`
 - `/orders-ui/`
@@ -241,6 +273,15 @@ high_performance_ecommerce/
 ## Current Progress
 
 The base Django project has been scaffolded. The domain apps, models, serializers, API views, URL routing, middleware, Celery setup, Docker Compose setup, templates, README, environment example, seed script, and initial migrations are in place.
+
+JWT authentication has been added with SimpleJWT:
+
+1. `POST /api/auth/register/` creates a default Django user and returns `user`, `access`, and `refresh`.
+2. `POST /api/auth/token/` logs in and returns JWT tokens.
+3. `POST /api/auth/token/refresh/` refreshes expired access tokens.
+4. `GET /api/auth/me/` returns the current authenticated user's `id`, `username`, and `email`.
+
+A simple Django template UI has been added under `/ui/`. It uses Bootstrap CDN, vanilla JavaScript, `fetch()`, and JWT tokens in `localStorage`. It supports registration, login, product browsing, add to cart, cart update/remove, checkout, order listing, dashboard, and logout. If an access token expires, the UI tries `/api/auth/token/refresh/` once before redirecting to login.
 
 Checkout currently:
 
@@ -264,11 +305,15 @@ Checkout currently:
 5. Create a superuser.
 6. Seed sample products.
 7. Test Swagger endpoints manually.
-8. Add automated API tests.
-9. Add stress tests with k6.
-10. Add Redis caching to product endpoints.
-11. Add Nginx and multiple web replicas for load balancing.
-12. Add benchmarking scripts and write benchmark reports.
+8. Test the full UI flow from `/ui/register/` to checkout.
+9. Add automated API tests.
+10. Strengthen race condition testing around checkout stock locking.
+11. Add Redis caching to product endpoints.
+12. Make batch processing chunk-based.
+13. Add resource limits such as throttling and worker concurrency caps.
+14. Add Nginx and multiple web replicas for load balancing.
+15. Add k6 stress testing.
+16. Add benchmarking scripts and write benchmark reports.
 
 ## Known Decisions
 
@@ -277,6 +322,7 @@ Checkout currently:
 - Use PostgreSQL as the main relational database.
 - Use Redis for cache and Celery broker/result backend.
 - Use Celery for async jobs.
+- Use SimpleJWT for API authentication.
 - Use k6 later for stress testing.
 - Use Nginx later for load balancing.
 - Do not add a custom user model.

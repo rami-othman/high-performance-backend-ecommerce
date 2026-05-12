@@ -1,0 +1,60 @@
+{% extends "ui/base.html" %}
+
+{% block title %}Register | E-Commerce UI{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-5">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h1 class="h3 mb-3">Create Account</h1>
+                <div id="message"></div>
+                <form id="registerForm">
+                    <div class="mb-3">
+                        <label class="form-label" for="username">Username</label>
+                        <input class="form-control" id="username" name="username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="email">Email</label>
+                        <input class="form-control" id="email" name="email" type="email">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="password">Password</label>
+                        <input class="form-control" id="password" name="password" type="password" minlength="8" required>
+                    </div>
+                    <button class="btn btn-primary w-100" type="submit">Register</button>
+                </form>
+                <p class="mt-3 mb-0">Already have an account? <a href="/ui/login/">Login</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.getElementById("registerForm").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const payload = {
+            username: event.target.username.value,
+            email: event.target.email.value,
+            password: event.target.password.value
+        };
+
+        const response = await fetch("/api/auth/register/", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(payload)
+        });
+        const data = await readJsonResponse(response);
+
+        if (!response.ok) {
+            showAlert(data.detail || JSON.stringify(data));
+            return;
+        }
+
+        saveTokens(data);
+        window.location.href = "/ui/products/";
+    });
+</script>
+{% endblock %}

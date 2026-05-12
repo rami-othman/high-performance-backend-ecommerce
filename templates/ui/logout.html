@@ -1,0 +1,19 @@
+{% extends "ui/base.html" %}
+
+{% block title %}Logout | E-Commerce UI{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-body">
+        <h1 class="h3">Logging out</h1>
+        <p class="text-muted mb-0">Clearing local tokens and returning to login.</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    clearTokens();
+    window.location.href = "/ui/login/";
+</script>
+{% endblock %}

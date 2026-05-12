@@ -40,10 +40,12 @@ class CheckoutView(APIView):
         product_ids = [item.product_id for item in cart_items]
 
         with transaction.atomic():
-            # Row-level locks make this checkout path ready for race-condition testing.
+            # ACID boundary: every stock change, order row, payment row, and cart clear
+            # succeeds or rolls back as one checkout operation.
+            # Row-level locks protect product stock from concurrent checkout races.
             locked_products = {
                 product.id: product
-                for product in Product.objects.select_for_update().filter(id__in=product_ids)
+                for product in Product.objects.select_for_update().filter(id__in=product_ids).order_by("id")
             }
 
             total_price = Decimal("0.00")
@@ -90,6 +92,7 @@ class CheckoutView(APIView):
 
             cart.items.all().delete()
 
+            # Dispatch only after the database commit succeeds.
             transaction.on_commit(lambda order_id=order.id: dispatch_order_tasks(order_id))
 
         serializer = OrderSerializer(order)

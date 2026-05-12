@@ -1,0 +1,69 @@
+{% extends "ui/base.html" %}
+
+{% block title %}Orders | E-Commerce UI{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h1 class="h3 mb-1">Orders</h1>
+        <p class="text-muted mb-0">Orders are scoped to the currently authenticated user.</p>
+    </div>
+    <a class="btn btn-outline-secondary" href="/ui/products/">Products</a>
+</div>
+<div id="message"></div>
+<div id="orders"></div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    requireAuth();
+
+    function renderOrders(orders) {
+        const container = document.getElementById("orders");
+        if (!orders.length) {
+            container.innerHTML = `<div class="alert alert-info">No orders yet.</div>`;
+            return;
+        }
+
+        container.innerHTML = orders.map((order) => `
+            <div class="card shadow-sm mb-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between flex-wrap gap-2">
+                        <h2 class="h5 mb-0">Order #${order.id}</h2>
+                        <span class="badge text-bg-secondary">${escapeHtml(order.status)}</span>
+                    </div>
+                    <p class="text-muted mb-2">${new Date(order.created_at).toLocaleString()}</p>
+                    <p><strong>Total:</strong> $${order.total_price}</p>
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead><tr><th>Product</th><th>Qty</th><th>Unit</th><th>Total</th></tr></thead>
+                            <tbody>
+                                ${(order.items || []).map((item) => `
+                                    <tr>
+                                        <td>${escapeHtml(item.product_detail?.name || "Product #" + item.product)}</td>
+                                        <td>${item.quantity}</td>
+                                        <td>$${item.unit_price}</td>
+                                        <td>$${item.total_price}</td>
+                                    </tr>
+                                `).join("")}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        `).join("");
+    }
+
+    async function loadOrders() {
+        const response = await apiFetch("/api/orders/");
+        const data = await readJsonResponse(response);
+        if (!response.ok) {
+            showAlert(data.detail || "Could not load orders.");
+            return;
+        }
+        renderOrders(data.results || data);
+    }
+
+    loadOrders();
+</script>
+{% endblock %}

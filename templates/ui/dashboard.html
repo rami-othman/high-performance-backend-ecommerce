@@ -1,0 +1,67 @@
+{% extends "ui/base.html" %}
+
+{% block title %}Dashboard | E-Commerce UI{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1 class="h3 mb-1">Demo Dashboard</h1>
+    <p class="text-muted mb-0">Use this page to navigate the university backend demo flow.</p>
+</div>
+<div id="message"></div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h2 class="h5">Products</h2>
+                <p class="display-6" id="productCount">-</p>
+                <a class="btn btn-primary" href="/ui/products/">Browse Products</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h2 class="h5">My Orders</h2>
+                <p class="display-6" id="orderCount">-</p>
+                <a class="btn btn-primary" href="/ui/orders/">View Orders</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <h2 class="h5">Links</h2>
+        <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-outline-secondary" href="/ui/cart/">Cart</a>
+            <a class="btn btn-outline-secondary" href="/api/docs/">Swagger</a>
+            <a class="btn btn-outline-secondary" href="/admin/">Admin</a>
+            <a class="btn btn-outline-secondary" href="/api/health/">Health</a>
+            <a class="btn btn-outline-secondary" href="/api/server-info/">Server Info</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    requireAuth();
+
+    async function loadDashboard() {
+        const productsResponse = await apiFetch("/api/products/");
+        const products = await readJsonResponse(productsResponse);
+        if (productsResponse.ok) {
+            document.getElementById("productCount").textContent = (products.results || products).length;
+        }
+
+        const ordersResponse = await apiFetch("/api/orders/");
+        const orders = await readJsonResponse(ordersResponse);
+        if (ordersResponse.ok) {
+            document.getElementById("orderCount").textContent = (orders.results || orders).length;
+        }
+    }
+
+    loadDashboard();
+</script>
+{% endblock %}

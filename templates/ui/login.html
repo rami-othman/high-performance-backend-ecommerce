@@ -1,0 +1,53 @@
+{% extends "ui/base.html" %}
+
+{% block title %}Login | E-Commerce UI{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-5">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h1 class="h3 mb-3">Login</h1>
+                <div id="message"></div>
+                <form id="loginForm">
+                    <div class="mb-3">
+                        <label class="form-label" for="username">Username</label>
+                        <input class="form-control" id="username" name="username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="password">Password</label>
+                        <input class="form-control" id="password" name="password" type="password" required>
+                    </div>
+                    <button class="btn btn-primary w-100" type="submit">Login</button>
+                </form>
+                <p class="mt-3 mb-0">Need an account? <a href="/ui/register/">Register</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.getElementById("loginForm").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const response = await fetch("/api/auth/token/", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({
+                username: event.target.username.value,
+                password: event.target.password.value
+            })
+        });
+        const data = await readJsonResponse(response);
+
+        if (!response.ok) {
+            showAlert(data.detail || "Login failed.");
+            return;
+        }
+
+        saveTokens(data);
+        window.location.href = "/ui/products/";
+    });
+</script>
+{% endblock %}

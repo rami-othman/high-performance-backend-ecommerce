@@ -1,0 +1,123 @@
+{% extends "ui/base.html" %}
+
+{% block title %}Cart | E-Commerce UI{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h1 class="h3 mb-1">Cart</h1>
+        <p class="text-muted mb-0">Review quantities before checkout.</p>
+    </div>
+    <a class="btn btn-outline-secondary" href="/ui/products/">Continue Shopping</a>
+</div>
+<div id="message"></div>
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Total</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="cartItems"></tbody>
+            </table>
+        </div>
+        <div class="d-flex justify-content-between align-items-center">
+            <strong id="cartTotal">Total: $0.00</strong>
+            <button class="btn btn-success" onclick="checkout()">Checkout</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    requireAuth();
+
+    function renderCart(cart) {
+        const items = cart.items || [];
+        const body = document.getElementById("cartItems");
+        let total = 0;
+
+        if (!items.length) {
+            body.innerHTML = `<tr><td colspan="5" class="text-center text-muted">Your cart is empty.</td></tr>`;
+            document.getElementById("cartTotal").textContent = "Total: $0.00";
+            return;
+        }
+
+        body.innerHTML = items.map((item) => {
+            const product = item.product_detail || {};
+            const price = Number(product.price || 0);
+            const lineTotal = price * item.quantity;
+            total += lineTotal;
+            return `
+                <tr>
+                    <td>${escapeHtml(product.name || "Product #" + item.product)}</td>
+                    <td>$${price.toFixed(2)}</td>
+                    <td><input class="form-control form-control-sm" id="qty-${item.id}" type="number" min="1" value="${item.quantity}"></td>
+                    <td>$${lineTotal.toFixed(2)}</td>
+                    <td class="text-end">
+                        <button class="btn btn-sm btn-outline-primary me-2" onclick="updateItem(${item.id})">Update</button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="removeItem(${item.id})">Remove</button>
+                    </td>
+                </tr>
+            `;
+        }).join("");
+
+        document.getElementById("cartTotal").textContent = `Total: $${total.toFixed(2)}`;
+    }
+
+    async function loadCart() {
+        const response = await apiFetch("/api/cart/");
+        const data = await readJsonResponse(response);
+        if (!response.ok) {
+            showAlert(data.detail || "Could not load cart.");
+            return;
+        }
+        renderCart(data);
+    }
+
+    async function updateItem(itemId) {
+        const quantity = Number(document.getElementById(`qty-${itemId}`).value || 1);
+        const response = await apiFetch(`/api/cart/items/${itemId}/`, {
+            method: "PATCH",
+            body: JSON.stringify({quantity})
+        });
+        const data = await readJsonResponse(response);
+        if (!response.ok) {
+            showAlert(data.detail || JSON.stringify(data));
+            return;
+        }
+        showAlert("Cart item updated.", "success");
+        loadCart();
+    }
+
+    async function removeItem(itemId) {
+        const response = await apiFetch(`/api/cart/items/${itemId}/`, {method: "DELETE"});
+        if (!response.ok) {
+            const data = await readJsonResponse(response);
+            showAlert(data.detail || "Could not remove item.");
+            return;
+        }
+        showAlert("Cart item removed.", "success");
+        loadCart();
+    }
+
+    async function checkout() {
+        const response = await apiFetch("/api/orders/checkout/", {method: "POST"});
+        const data = await readJsonResponse(response);
+        if (!response.ok) {
+            showAlert(data.detail || JSON.stringify(data));
+            return;
+        }
+        window.location.href = "/ui/orders/";
+    }
+
+    loadCart();
+</script>
+{% endblock %}

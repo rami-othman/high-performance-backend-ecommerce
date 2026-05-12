@@ -11,6 +11,7 @@ The project starts with a clean, correct backend foundation before adding perfor
 - Python 3.11
 - Django
 - Django REST Framework
+- djangorestframework-simplejwt
 - PostgreSQL
 - Redis
 - Celery
@@ -31,6 +32,31 @@ This is a monolithic Django project with separate domain apps. It is not a micro
 - `reports`: daily sales report model and batch task placeholder
 - `performance`: request duration logging and health/server info endpoints
 
+## JWT Authentication
+
+API authentication uses SimpleJWT. The main API authentication class is `JWTAuthentication`, with `BasicAuthentication` kept available for simple manual testing.
+
+JWT endpoints:
+
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| POST | `/api/auth/register/` | Create a default Django user and return tokens |
+| POST | `/api/auth/token/` | Login and return access/refresh tokens |
+| POST | `/api/auth/token/refresh/` | Refresh an expired access token |
+| GET | `/api/auth/me/` | Return the current authenticated user |
+
+Registration accepts:
+
+```json
+{
+  "username": "student",
+  "email": "student@example.com",
+  "password": "strong-password"
+}
+```
+
+The response includes `user`, `access`, and `refresh`. API POST requests should use JWT instead of browser session auth, which avoids the Swagger CSRF issue from session-authenticated POST requests.
+
 ## Database Tables
 
 - `products_product`: product catalog, stock, version field
@@ -47,6 +73,10 @@ This is a monolithic Django project with separate domain apps. It is not a micro
 
 | Method | Endpoint | Purpose |
 | --- | --- | --- |
+| POST | `/api/auth/register/` | Register user and return JWT tokens |
+| POST | `/api/auth/token/` | Login and return JWT tokens |
+| POST | `/api/auth/token/refresh/` | Refresh JWT access token |
+| GET | `/api/auth/me/` | Current authenticated user |
 | GET | `/api/products/` | List products |
 | GET | `/api/products/{id}/` | Product detail |
 | GET | `/api/cart/` | Current user's cart |
@@ -68,13 +98,16 @@ Admin-only endpoints currently use DRF `IsAdminUser`. Cart and order endpoints r
 
 ## Simple UI Pages
 
-- `/`
-- `/products-ui/`
-- `/cart-ui/`
-- `/orders-ui/`
-- `/dashboard/`
+- `/` redirects to `/ui/dashboard/`
+- `/ui/register/`
+- `/ui/login/`
+- `/ui/products/`
+- `/ui/cart/`
+- `/ui/orders/`
+- `/ui/dashboard/`
+- `/ui/logout/`
 
-These pages are intentionally simple. The backend APIs are the main project surface.
+The UI uses Django templates, Bootstrap CDN, vanilla JavaScript, `fetch()`, and JWT tokens stored in `localStorage`. It is intentionally simple because the backend APIs are the main project surface.
 
 ## Run Locally With Conda
 
@@ -137,6 +170,31 @@ Open Swagger:
 http://127.0.0.1:8000/api/docs/
 ```
 
+## Use JWT In Swagger
+
+1. Open `http://127.0.0.1:8000/api/docs/`.
+2. Call `POST /api/auth/token/` with a username and password, or call `POST /api/auth/register/`.
+3. Copy the returned `access` token.
+4. Click **Authorize** in Swagger.
+5. Enter:
+
+```text
+Bearer <access_token>
+```
+
+6. Use authenticated endpoints such as `/api/cart/`, `/api/cart/items/`, and `/api/orders/checkout/`.
+
+## Test The Web UI Flow
+
+1. Open `http://127.0.0.1:8000/ui/register/`.
+2. Create a user.
+3. The browser saves JWT tokens in `localStorage` and redirects to `/ui/products/`.
+4. Add products to the cart.
+5. Open `/ui/cart/`.
+6. Update quantities or remove items if needed.
+7. Click checkout.
+8. View created orders at `/ui/orders/`.
+
 ## Run With Docker
 
 Create `.env` first:
@@ -170,6 +228,7 @@ http://127.0.0.1:8000/api/docs/
 - Clean monolithic Django structure
 - Domain apps for products, cart, orders, payments, reports, and performance
 - Product read API
+- JWT register, login, refresh, and current-user APIs
 - Authenticated cart API
 - Authenticated order API
 - Checkout with `transaction.atomic()`
@@ -183,15 +242,17 @@ http://127.0.0.1:8000/api/docs/
 - Swagger/OpenAPI docs
 - Docker Compose with web, PostgreSQL, Redis, and Celery
 - Simple Django template pages
+- Simple e-commerce UI that consumes the API with JWT and token refresh
 - Seed data script
 - Initial migrations for all domain apps
 
 ## TODO
 
 - Add automated tests for API behavior and checkout race conditions
+- Strengthen race condition tests around checkout stock locking
 - Add Redis caching to product list/detail endpoints
-- Add resource capacity controls such as checkout throttling or worker limits
 - Add batch report chunking for large order tables
+- Add resource capacity controls such as checkout throttling or worker limits
 - Add k6 stress tests
 - Add benchmarking scripts and result documentation
 - Add Nginx for load distribution across multiple Django containers
