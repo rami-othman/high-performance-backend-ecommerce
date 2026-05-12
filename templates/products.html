@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}Products | High-Performance E-Commerce{% endblock %}
+
+{% block content %}
+<section class="panel">
+    <h1>Products</h1>
+    <p>Backend endpoint: <code>GET /api/products/</code> and <code>GET /api/products/{id}/</code>.</p>
+    <table>
+        <thead>
+            <tr><th>Field</th><th>Purpose</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>stock</td><td>Reduced during checkout inside a transaction.</td></tr>
+            <tr><td>version</td><td>Available for later optimistic concurrency experiments.</td></tr>
+            <tr><td>price</td><td>Captured into order items at checkout time.</td></tr>
+        </tbody>
+    </table>
+</section>
+{% endblock %}

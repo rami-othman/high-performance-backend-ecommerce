@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}Orders | High-Performance E-Commerce{% endblock %}
+
+{% block content %}
+<section class="panel">
+    <h1>Orders</h1>
+    <p>Checkout creates orders, order items, a payment record, stock updates, and Celery jobs.</p>
+    <table>
+        <thead>
+            <tr><th>Method</th><th>Endpoint</th><th>Action</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>POST</td><td><code>/api/orders/checkout/</code></td><td>Transactional checkout.</td></tr>
+            <tr><td>GET</td><td><code>/api/orders/</code></td><td>List authenticated user's orders.</td></tr>
+            <tr><td>GET</td><td><code>/api/orders/{id}/</code></td><td>View one order.</td></tr>
+        </tbody>
+    </table>
+</section>
+{% endblock %}

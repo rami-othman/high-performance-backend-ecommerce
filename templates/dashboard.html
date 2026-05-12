@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard | High-Performance E-Commerce{% endblock %}
+
+{% block content %}
+<section class="panel">
+    <h1>Project Dashboard</h1>
+    <p>This page is a simple UI entry point for the backend project status.</p>
+</section>
+
+<section class="grid">
+    <div class="panel">
+        <h2>Performance</h2>
+        <p><code>GET /api/performance/logs/</code> stores request duration data for later benchmarking.</p>
+    </div>
+    <div class="panel">
+        <h2>Reports</h2>
+        <p><code>POST /api/reports/daily-sales/run/</code> dispatches the sales report task.</p>
+    </div>
+    <div class="panel">
+        <h2>Load Distribution</h2>
+        <p><code>GET /api/server-info/</code> returns <code>SERVER_NAME</code> for later Nginx testing.</p>
+    </div>
+</section>
+{% endblock %}

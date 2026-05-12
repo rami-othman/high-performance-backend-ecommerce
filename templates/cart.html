@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}Cart | High-Performance E-Commerce{% endblock %}
+
+{% block content %}
+<section class="panel">
+    <h1>Cart</h1>
+    <p>One cart is created per authenticated user. Use these API endpoints for cart operations.</p>
+    <table>
+        <thead>
+            <tr><th>Method</th><th>Endpoint</th><th>Action</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>GET</td><td><code>/api/cart/</code></td><td>View current cart.</td></tr>
+            <tr><td>POST</td><td><code>/api/cart/items/</code></td><td>Add product quantity.</td></tr>
+            <tr><td>PATCH</td><td><code>/api/cart/items/{id}/</code></td><td>Update quantity.</td></tr>
+            <tr><td>DELETE</td><td><code>/api/cart/items/{id}/</code></td><td>Remove item.</td></tr>
+        </tbody>
+    </table>
+</section>
+{% endblock %}

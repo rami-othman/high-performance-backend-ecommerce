@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}High-Performance E-Commerce{% endblock %}</title>
+    <style>
+        :root {
+            --bg: #f6f7f9;
+            --panel: #ffffff;
+            --ink: #1f2933;
+            --muted: #637083;
+            --line: #d8dee8;
+            --accent: #0f766e;
+            --accent-dark: #115e59;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Tahoma, sans-serif;
+            color: var(--ink);
+            background: var(--bg);
+        }
+        header {
+            background: var(--panel);
+            border-bottom: 1px solid var(--line);
+            padding: 16px 24px;
+        }
+        nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            align-items: center;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        nav strong { margin-right: auto; }
+        nav a {
+            color: var(--accent-dark);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        main {
+            width: min(1100px, calc(100% - 32px));
+            margin: 32px auto;
+        }
+        .panel {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+        h1, h2 { margin-top: 0; }
+        p { color: var(--muted); line-height: 1.6; }
+        code {
+            background: #edf2f7;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--panel);
+        }
+        th, td {
+            text-align: left;
+            border-bottom: 1px solid var(--line);
+            padding: 10px;
+        }
+        th { color: var(--muted); }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <strong>High-Performance E-Commerce</strong>
+            <a href="/">Home</a>
+            <a href="/products-ui/">Products</a>
+            <a href="/cart-ui/">Cart</a>
+            <a href="/orders-ui/">Orders</a>
+            <a href="/dashboard/">Dashboard</a>
+            <a href="/api/docs/">Swagger</a>
+        </nav>
+    </header>
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>
