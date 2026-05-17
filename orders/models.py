@@ -32,3 +32,30 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f"{self.quantity} x {self.product.name}"
+
+
+class OrderBackgroundTask(models.Model):
+    class Status(models.TextChoices):
+        QUEUED = "queued", "Queued"
+        STARTED = "started", "Started"
+        SUCCESS = "success", "Success"
+        FAILURE = "failure", "Failure"
+
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="background_tasks")
+    task_name = models.CharField(max_length=100)
+    celery_task_id = models.CharField(max_length=255, null=True, blank=True, db_index=True)
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.QUEUED)
+    started_at = models.DateTimeField(null=True, blank=True)
+    finished_at = models.DateTimeField(null=True, blank=True)
+    duration_ms = models.PositiveIntegerField(null=True, blank=True)
+    message = models.TextField(blank=True)
+    error_message = models.TextField(blank=True)
+    metadata = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.task_name} for order #{self.order_id} ({self.status})"

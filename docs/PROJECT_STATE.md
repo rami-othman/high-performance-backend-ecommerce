@@ -70,6 +70,7 @@ high_performance_ecommerce/
 |   `-- views.py
 |-- orders/
 |   |-- migrations/0001_initial.py
+|   |-- migrations/0002_orderbackgroundtask.py
 |   |-- __init__.py
 |   |-- admin.py
 |   |-- apps.py
@@ -125,8 +126,10 @@ high_performance_ecommerce/
 |-- docs/
 |   |-- PROJECT_DOCUMENTATION.md
 |   |-- PROJECT_STATE.md
-|   `-- TASK_1_CONCURRENT_ACCESS.md
+|   |-- TASK_1_CONCURRENT_ACCESS.md
+|   `-- TASK_3_ASYNC_QUEUES.md
 |-- scripts/
+|   |-- async_queue_test.py
 |   |-- race_condition_test.py
 |   |-- resource_capacity_test.py
 |   |-- start_web.sh
@@ -190,6 +193,21 @@ high_performance_ecommerce/
 - `quantity`
 - `unit_price`
 - `total_price`
+
+### orders.OrderBackgroundTask
+
+- `order`
+- `task_name`
+- `celery_task_id`
+- `status`
+- `started_at`
+- `finished_at`
+- `duration_ms`
+- `message`
+- `error_message`
+- `metadata`
+- `created_at`
+- `updated_at`
 
 ### payments.Payment
 
@@ -302,9 +320,9 @@ Checkout currently:
 8. Reduces product stock and increments product version.
 9. Creates a completed payment record.
 10. Clears the cart.
-11. Dispatches placeholder Celery invoice and notification tasks with `transaction.on_commit()` after the transaction succeeds.
+11. Dispatches real Celery invoice and notification tasks with `transaction.on_commit()` after the transaction succeeds.
 
-This prepares checkout for race-condition testing by preventing duplicate checkout from the same locked cart and by serializing concurrent stock updates on locked product rows.
+This protects checkout from duplicate cart use and concurrent stock races while keeping non-critical invoice and notification work outside the request path.
 
 ## Task 1 - Concurrent Access & Data Integrity
 
@@ -408,6 +426,41 @@ results/resource_capacity/resource_capacity_task2_latest.json
 results/resource_capacity/resource_capacity_task2_YYYYMMDD_HHMMSS.json
 ```
 
+## Task 3 - Asynchronous Queues
+
+Task 3 is now implemented and provable.
+
+The chosen solution is Celery with Redis as the broker:
+
+- `orders/models.py` has `OrderBackgroundTask` for persistent DB logs.
+- `orders/tasks.py` has bound Celery tasks for invoice generation and order notification simulation.
+- `orders/views.py` creates queued task rows and dispatches tasks after checkout commit with `transaction.on_commit()`.
+- `config/settings.py` has `ORDER_ASYNC_TASK_TEST_DELAY_ENABLED` and `ORDER_ASYNC_TASK_TEST_DELAY_SECONDS`.
+- `.env.example` includes the async proof delay settings.
+- `scripts/async_queue_test.py` proves checkout returns before background tasks finish.
+
+The background task proof model records:
+
+```text
+queued -> started -> success
+queued -> started -> failure
+```
+
+Each task stores the Celery task ID, start/end timestamps, duration, message, error message, and metadata. The invoice task records invoice metadata without writing a PDF. The notification task records simulated order confirmation metadata without sending a real email.
+
+Task 3 result files are written to:
+
+```text
+results/async_queues/async_queue_task3_latest.json
+results/async_queues/async_queue_task3_YYYYMMDD_HHMMSS.json
+```
+
+Task 3 documentation is:
+
+```text
+docs/TASK_3_ASYNC_QUEUES.md
+```
+
 ## Next Tasks
 
 1. Install dependencies in a Conda environment.
@@ -418,14 +471,12 @@ results/resource_capacity/resource_capacity_task2_YYYYMMDD_HHMMSS.json
 6. Seed sample products.
 7. Test Swagger endpoints manually.
 8. Test the full UI flow from `/ui/register/` to checkout.
-9. Implement Task 3: Asynchronous Queues.
+9. Implement Task 4: Batch Processing.
 10. Expand automated API tests.
 11. Add Redis caching to product endpoints.
-12. Make batch processing chunk-based.
-13. Add resource limits such as throttling and worker concurrency caps.
-14. Add Nginx and multiple web replicas for load balancing.
-15. Add k6 stress testing.
-16. Add benchmarking scripts and write benchmark reports.
+12. Add Nginx and multiple web replicas for load balancing.
+13. Add k6 stress testing.
+14. Add benchmarking scripts and write benchmark reports.
 
 ## Known Decisions
 
@@ -443,4 +494,4 @@ results/resource_capacity/resource_capacity_task2_YYYYMMDD_HHMMSS.json
 
 ## Important Notes
 
-The project is intentionally simple at this stage. Task 1 is implemented with the checkout transaction, cart lock, deterministic product locking, post-commit Celery dispatch, a race-condition proof script, and report-ready documentation. Task 2 is implemented with a Redis-backed checkout capacity limiter, scoped DRF throttling, capacity metrics, a resource capacity proof script, and main project documentation. The next non-functional requirement is Task 3 - Asynchronous Queues. Performance logging is basic and database-backed so benchmarking can start early, but it may later need buffering or sampling to reduce overhead under heavy load.
+The project is intentionally simple at this stage. Task 1 is implemented with the checkout transaction, cart lock, deterministic product locking, a race-condition proof script, and report-ready documentation. Task 2 is implemented with a Redis-backed checkout capacity limiter, scoped DRF throttling, capacity metrics, a resource capacity proof script, and main project documentation. Task 3 is implemented with Celery invoice/notification tasks, persistent `OrderBackgroundTask` logs, `transaction.on_commit()` dispatch, and an async queue proof script. The next non-functional requirement is Task 4 - Batch Processing. Performance logging is basic and database-backed so benchmarking can start early, but it may later need buffering or sampling to reduce overhead under heavy load.

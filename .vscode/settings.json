@@ -1,5 +1,8 @@
 {
     "python-envs.defaultEnvManager": "ms-python.python:conda",
     "python-envs.defaultPackageManager": "ms-python.python:conda",
-    "python.defaultInterpreterPath": "C:\\Users\\Rami\\anaconda3\\envs\\ecommerce-backend\\python.exe"
+    "python.defaultInterpreterPath": "C:\\Users\\Rami\\anaconda3\\envs\\ecommerce-backend\\python.exe",
+    "cSpell.words": [
+        "timespec"
+    ]
 }

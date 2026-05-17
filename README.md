@@ -64,6 +64,7 @@ The response includes `user`, `access`, and `refresh`. API POST requests should 
 - `cart_cartitem`: product quantities in a cart
 - `orders_order`: order header with total and status
 - `orders_orderitem`: immutable checkout line items
+- `orders_orderbackgroundtask`: persistent Celery task status proof for order background work
 - `payments_payment`: one payment per order
 - `reports_dailysalesreport`: daily aggregate sales results
 - `performance_performancelog`: API/UI request timing logs
@@ -285,6 +286,64 @@ Expected default result:
 
 The proof script uses the `X-Capacity-Test-Delay` header only in `DEBUG=True` proof/demo mode so concurrent requests overlap reliably. The script saves proof output in `results/resource_capacity/resource_capacity_task2_latest.json` and a timestamped JSON file.
 
+## Task 3 - Asynchronous Queues
+
+Task 3 proves that checkout only performs critical ACID work synchronously. Slow non-critical work is moved to Celery so the user does not wait for invoice generation or order notification handling.
+
+Chosen approach:
+
+- Celery worker with Redis as broker/result backend
+- `transaction.on_commit()` to enqueue work only after the order transaction commits
+- Persistent `OrderBackgroundTask` rows for `queued`, `started`, `success`, and `failure` proof
+- Worker-side demo delay controlled by environment settings, capped at three seconds
+
+Key files:
+
+- `orders/tasks.py`: measurable invoice and notification Celery tasks
+- `orders/views.py`: post-commit task dispatch and queued task log creation
+- `orders/models.py`: `OrderBackgroundTask` proof model
+- `scripts/async_queue_test.py`: HTTP proof script for non-blocking checkout
+- `docs/TASK_3_ASYNC_QUEUES.md`: report-ready Task 3 explanation
+
+Redis acts as the Celery queue broker. Checkout creates the order, order items, payment, stock updates, and cart clear inside `transaction.atomic()`. After commit, the post-commit callback enqueues `generate_invoice_task` and `send_order_notification_task`. If a background task fails, the order and payment remain valid because invoice/notification work is outside the ACID checkout transaction.
+
+Docker:
+
+```bash
+docker compose up --build
+docker compose exec web python scripts/async_queue_test.py
+```
+
+Local:
+
+```bash
+python manage.py runserver
+```
+
+In another terminal:
+
+```bash
+celery -A config worker --loglevel=info
+```
+
+Run:
+
+```bash
+python scripts/async_queue_test.py
+```
+
+Expected default result:
+
+- Checkout status: `201`
+- Background tasks created: `2`
+- Successful background tasks: `2`
+- Failed background tasks: `0`
+- Checkout duration is less than total background duration
+- Checkout returned before background tasks finished
+- Result: `PASSED`
+
+The script saves proof output in `results/async_queues/async_queue_task3_latest.json` and a timestamped JSON file.
+
 ## Run With Docker
 
 Create `.env` first:
@@ -330,10 +389,13 @@ http://127.0.0.1:8000/api/docs/
 - DRF scoped throttling for auth, cart, checkout, and reports
 - Configurable Gunicorn `gthread` web concurrency for capacity testing
 - Task 2 resource capacity proof script
+- Real Celery invoice and order notification tasks dispatched after checkout commit
+- Persistent `OrderBackgroundTask` lifecycle rows for queued/started/success/failure task proof
+- Task 3 asynchronous queue proof script
+- Task 3 documentation for asynchronous queues
 - Main project documentation in `docs/PROJECT_DOCUMENTATION.md`
 - Payment creation during checkout
 - Cart clearing after checkout
-- Placeholder Celery tasks for invoices and order notifications dispatched after transaction commit
 - Placeholder Celery task for daily sales reports
 - Basic automated checkout API test
 - Redis configured as Celery broker, result backend, and Django cache backend
@@ -348,11 +410,10 @@ http://127.0.0.1:8000/api/docs/
 
 ## TODO
 
-- Implement Task 3 asynchronous queue proof
+- Implement Task 4 batch processing
 - Expand automated tests for API behavior
 - Add Redis caching to product list/detail endpoints
 - Add batch report chunking for large order tables
-- Add resource capacity controls such as checkout throttling or worker limits
 - Add k6 stress tests
 - Add benchmarking scripts and result documentation
 - Add Nginx for load distribution across multiple Django containers
@@ -363,8 +424,8 @@ http://127.0.0.1:8000/api/docs/
 
 - Race Condition Protection: checkout locks the user's cart row inside `transaction.atomic()` before reading cart items, then locks product rows with `select_for_update()` in deterministic `id` order. Order invoice and notification Celery tasks are dispatched with `transaction.on_commit()` so workers only see committed orders. This prepares the project for checkout race-condition testing.
 - Resource Management: checkout uses a Redis-backed active request counter to cap concurrent checkout operations, DRF scoped throttling for API protection, and Gunicorn `gthread` workers so the web runtime can handle enough parallel requests for the limiter proof.
-- Queues: Celery is configured with Redis and placeholder order/report tasks.
-- Batch Processing: daily sales report task is ready to evolve into chunk-based processing.
+- Queues: Celery uses Redis to run invoice generation and order notification work outside the checkout request path. `OrderBackgroundTask` records prove queued, started, success, and failure states.
+- Batch Processing: Task 4 is next. The daily sales report task is ready to evolve into chunk-based processing.
 - Load Distribution: `/api/server-info/` returns `SERVER_NAME`; later Nginx can route across multiple `web` replicas.
 - Redis Cache: settings include Redis cache; later product and report endpoints can cache expensive reads.
 - Stress Testing: k6 will later simulate concurrent browse, cart, and checkout scenarios.

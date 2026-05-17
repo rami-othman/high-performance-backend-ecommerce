@@ -10,13 +10,13 @@ The project focuses on non-functional behavior that can be demonstrated and meas
 
 The project is organized around these implementation tasks:
 
-| Task | Requirement | Current Status |
-| --- | --- | --- |
-| Task 1 | Concurrent Access & Data Integrity | Implemented and provable |
-| Task 2 | Resource Management & Capacity Control | Implemented and provable |
-| Task 3 | Asynchronous Queues | To be completed in later phases |
-| Task 4 | Batch Processing | To be completed in later phases |
-| Task 5 | Load Distribution | To be completed in later phases |
+| Task   | Requirement                            | Current Status                  |
+| ------ | -------------------------------------- | ------------------------------- |
+| Task 1 | Concurrent Access & Data Integrity     | Implemented and provable        |
+| Task 2 | Resource Management & Capacity Control | Implemented and provable        |
+| Task 3 | Asynchronous Queues                    | Implemented and provable        |
+| Task 4 | Batch Processing                       | To be completed in later phases |
+| Task 5 | Load Distribution                      | To be completed in later phases |
 
 ## 3. Technology Stack
 
@@ -49,16 +49,17 @@ Redis is shared infrastructure for Celery, Django cache, DRF throttling, and the
 
 Core tables:
 
-| Table | Purpose |
-| --- | --- |
-| `products_product` | Product catalog, price, stock, optimistic version marker |
-| `cart_cart` | One cart per user |
-| `cart_cartitem` | Product quantities selected by a user |
-| `orders_order` | Order header with total price and status |
-| `orders_orderitem` | Immutable checkout line items |
-| `payments_payment` | One payment record per order |
-| `reports_dailysalesreport` | Daily aggregate sales data |
-| `performance_performancelog` | Request duration logging |
+| Table                          | Purpose                                                  |
+| ------------------------------ | -------------------------------------------------------- |
+| `products_product`           | Product catalog, price, stock, optimistic version marker |
+| `cart_cart`                  | One cart per user                                        |
+| `cart_cartitem`              | Product quantities selected by a user                    |
+| `orders_order`               | Order header with total price and status                 |
+| `orders_orderitem`           | Immutable checkout line items                            |
+| `orders_orderbackgroundtask` | Persistent Celery task lifecycle proof rows              |
+| `payments_payment`           | One payment record per order                             |
+| `reports_dailysalesreport`   | Daily aggregate sales data                               |
+| `performance_performancelog` | Request duration logging                                 |
 
 The most important shared data item is `Product.stock`, because many users can try to buy the same product at the same time.
 
@@ -66,18 +67,18 @@ The most important shared data item is `Product.stock`, because many users can t
 
 Main API endpoints:
 
-| Method | Endpoint | Purpose |
-| --- | --- | --- |
-| POST | `/api/auth/register/` | Register and receive JWT tokens |
-| POST | `/api/auth/token/` | Login and receive JWT tokens |
-| POST | `/api/auth/token/refresh/` | Refresh JWT token |
-| GET | `/api/products/` | List products |
-| GET | `/api/cart/` | Current user's cart |
-| POST | `/api/cart/items/` | Add item to cart |
-| POST | `/api/orders/checkout/` | Transactional checkout |
-| GET | `/api/orders/` | Current user's orders |
-| GET | `/api/performance/capacity/` | Admin-only checkout capacity metrics |
-| GET | `/api/docs/` | Swagger UI |
+| Method | Endpoint                       | Purpose                              |
+| ------ | ------------------------------ | ------------------------------------ |
+| POST   | `/api/auth/register/`        | Register and receive JWT tokens      |
+| POST   | `/api/auth/token/`           | Login and receive JWT tokens         |
+| POST   | `/api/auth/token/refresh/`   | Refresh JWT token                    |
+| GET    | `/api/products/`             | List products                        |
+| GET    | `/api/cart/`                 | Current user's cart                  |
+| POST   | `/api/cart/items/`           | Add item to cart                     |
+| POST   | `/api/orders/checkout/`      | Transactional checkout               |
+| GET    | `/api/orders/`               | Current user's orders                |
+| GET    | `/api/performance/capacity/` | Admin-only checkout capacity metrics |
+| GET    | `/api/docs/`                 | Swagger UI                           |
 
 JWT authentication remains the main API authentication method. Admin-only endpoints use DRF `IsAdminUser`.
 
@@ -139,14 +140,14 @@ python scripts/race_condition_test.py
 
 Default result table:
 
-| Metric | Value |
-| --- | --- |
-| Initial stock | 5 |
-| Concurrent users | 20 |
-| Successful checkouts | 5 |
-| Failed checkouts | 15 |
-| Final stock | 0 |
-| Result | PASSED |
+| Metric               | Value  |
+| -------------------- | ------ |
+| Initial stock        | 5      |
+| Concurrent users     | 20     |
+| Successful checkouts | 5      |
+| Failed checkouts     | 15     |
+| Final stock          | 0      |
+| Result               | PASSED |
 
 Conclusion: checkout protects `Product.stock` from overselling under concurrent requests.
 
@@ -174,31 +175,31 @@ Key files:
 
 Configuration:
 
-| Setting | Default |
-| --- | --- |
-| `CHECKOUT_MAX_CONCURRENT_REQUESTS` | `5` |
-| `CHECKOUT_CAPACITY_KEY` | `capacity:checkout:active` |
-| `CHECKOUT_CAPACITY_TTL_SECONDS` | `30` |
+| Setting                                  | Default                                           |
+| ---------------------------------------- | ------------------------------------------------- |
+| `CHECKOUT_MAX_CONCURRENT_REQUESTS`     | `5`                                             |
+| `CHECKOUT_CAPACITY_KEY`                | `capacity:checkout:active`                      |
+| `CHECKOUT_CAPACITY_TTL_SECONDS`        | `30`                                            |
 | `CHECKOUT_CAPACITY_TEST_DELAY_ENABLED` | `True` when `DEBUG=True`, otherwise `False` |
 
 Docker/Gunicorn runtime settings:
 
-| Setting | Default |
-| --- | --- |
-| `WEB_CONCURRENCY` | `8` |
-| `GUNICORN_THREADS` | `2` |
+| Setting              | Default |
+| -------------------- | ------- |
+| `WEB_CONCURRENCY`  | `8`   |
+| `GUNICORN_THREADS` | `2`   |
 | `GUNICORN_TIMEOUT` | `120` |
 
 The Docker web container uses Gunicorn `gthread` workers. The default effective request capacity is `WEB_CONCURRENCY * GUNICORN_THREADS = 16`, which is intentionally higher than the checkout limit of `5`. This matters for the proof: if Gunicorn runs with a single sync worker, requests are processed almost sequentially and the Redis limiter only observes one active checkout.
 
 DRF scoped throttling is also configured:
 
-| Scope | Default Rate |
-| --- | --- |
-| `auth` | `30/min` |
-| `cart` | `120/min` |
-| `checkout` | `60/min` |
-| `reports` | `20/min` |
+| Scope        | Default Rate |
+| ------------ | ------------ |
+| `auth`     | `30/min`   |
+| `cart`     | `120/min`  |
+| `checkout` | `60/min`   |
+| `reports`  | `20/min`   |
 
 ### Why Redis
 
@@ -266,22 +267,110 @@ results/resource_capacity/resource_capacity_task2_YYYYMMDD_HHMMSS.json
 
 Result table placeholder:
 
-| Metric | Expected |
-| --- | --- |
-| Configured checkout limit | 5 |
-| Concurrent users | 20 |
-| Server errors | 0 |
+| Metric                        | Expected     |
+| ----------------------------- | ------------ |
+| Configured checkout limit     | 5            |
+| Concurrent users              | 20           |
+| Server errors                 | 0            |
 | Max observed active checkouts | > 1 and <= 5 |
-| Capacity rejections | > 0 |
-| Result | PASSED |
+| Capacity rejections           | > 0          |
+| Result                        | PASSED       |
 
 Conclusion: the system controls checkout parallelism using Redis-backed capacity tracking and rejects overload cleanly.
 
 ## 11. Task 3 - Asynchronous Queues
 
-To be completed in later phases.
+Task 3 moves slow non-critical checkout work out of the HTTP request path.
 
-Planned focus: use Celery and Redis to process asynchronous work such as invoice generation, order notifications, and reports without blocking the request path.
+### Problem
+
+Users should not wait for work that is not required to complete the order. Invoice generation and order notification delivery can involve external systems, file generation, or email/SMS providers. If those operations run inside checkout, a slow provider makes checkout slow even though the order, payment, stock update, and cart clear are already complete.
+
+### Chosen Solution
+
+The project uses Celery workers with Redis as the queue broker. Checkout keeps only critical ACID work synchronous:
+
+1. Lock cart and product rows.
+2. Validate stock.
+3. Create order and order items.
+4. Reduce stock.
+5. Create payment.
+6. Clear cart.
+7. Commit the PostgreSQL transaction.
+
+After commit, `transaction.on_commit()` enqueues:
+
+- `generate_invoice_task`
+- `send_order_notification_task`
+
+Key files:
+
+- `orders/tasks.py`
+- `orders/views.py`
+- `orders/models.py`
+- `scripts/async_queue_test.py`
+- `results/async_queues/`
+
+### Why This Is Asynchronous
+
+The HTTP checkout response returns after the order transaction commits and the Celery messages are placed on Redis. The Celery worker runs invoice and notification work in a separate process. The user does not wait for the simulated invoice or notification delay.
+
+### Correctness
+
+`transaction.on_commit()` is important because workers must not see rolled-back orders. The callback is registered during checkout but runs only after PostgreSQL confirms the transaction committed. If checkout fails and rolls back, no invoice or notification task is queued for that failed order.
+
+### Failure Isolation
+
+Invoice and notification tasks are not part of the ACID checkout transaction. If a task fails, `OrderBackgroundTask.status` becomes `failure` and `error_message` records the exception, but the order and payment remain valid.
+
+### Persistent Proof Model
+
+`OrderBackgroundTask` records each background job:
+
+| Field Group                                      | Purpose                                                     |
+| ------------------------------------------------ | ----------------------------------------------------------- |
+| `order`, `task_name`, `celery_task_id`     | Link the database proof row to the order and Celery message |
+| `status`                                       | Tracks `queued`, `started`, `success`, or `failure` |
+| `started_at`, `finished_at`, `duration_ms` | Measures worker-side execution time                         |
+| `message`, `error_message`, `metadata`     | Stores task result details or failure information           |
+
+The invoice task stores metadata such as invoice number, order total, item count, and generated timestamp. The notification task stores username, email, message type, and sent timestamp. No real PDF or email is produced in this phase.
+
+### Proof
+
+Run the proof script while Django and Celery are running:
+
+```bash
+python scripts/async_queue_test.py
+```
+
+Docker:
+
+```bash
+docker compose up --build
+docker compose exec web python scripts/async_queue_test.py
+```
+
+Expected result table:
+
+| Metric                                   | Expected |
+| ---------------------------------------- | -------- |
+| Checkout status                          | 201      |
+| Background tasks                         | 2        |
+| Successful tasks                         | 2        |
+| Failed tasks                             | 0        |
+| Celery task IDs present                  | Yes      |
+| Checkout returned before task completion | Yes      |
+| Result                                   | PASSED   |
+
+The script writes:
+
+```text
+results/async_queues/async_queue_task3_latest.json
+results/async_queues/async_queue_task3_YYYYMMDD_HHMMSS.json
+```
+
+Conclusion: checkout commits the order and returns before the slower invoice and notification work finishes in Celery.
 
 ## 12. Task 4 - Batch Processing
 
@@ -325,9 +414,10 @@ The final demo should show:
 2. Browse products and add to cart.
 3. Run Task 1 race-condition proof.
 4. Run Task 2 resource-capacity proof.
-5. Show performance logs and capacity metrics.
-6. Demonstrate later queue, batch, load distribution, caching, and benchmarking tasks as they are completed.
+5. Run Task 3 asynchronous-queue proof.
+6. Show performance logs and capacity metrics.
+7. Demonstrate later batch, load distribution, caching, and benchmarking tasks as they are completed.
 
 ## 19. Conclusion
 
-The project now has a correct transactional checkout foundation, a race-condition proof for shared stock, and a Redis-backed capacity limiter that prevents excessive checkout parallelism. The remaining phases will extend the system with asynchronous processing, batch processing, load distribution, caching, stress testing, and benchmark documentation.
+The project now has a correct transactional checkout foundation, a race-condition proof for shared stock, a Redis-backed capacity limiter that prevents excessive checkout parallelism, and Celery-backed asynchronous queue proof for non-critical checkout work. The remaining phases will extend the system with batch processing, load distribution, caching, stress testing, and benchmark documentation.

@@ -14,17 +14,36 @@ from cart.models import Cart
 from payments.models import Payment
 from performance.capacity_limiter import CheckoutCapacityLimiter, CheckoutCapacityUnavailable
 from products.models import Product
-from .models import Order, OrderItem
+from .models import Order, OrderBackgroundTask, OrderItem
 from .serializers import OrderSerializer
 from .tasks import generate_invoice_task, send_order_notification_task
 
 
 def dispatch_order_tasks(order_id):
-    try:
-        generate_invoice_task.delay(order_id)
-        send_order_notification_task.delay(order_id)
-    except Exception as exc:
-        print(f"Order {order_id} was saved, but task dispatch failed: {exc}")
+    task_specs = [
+        ("generate_invoice_task", generate_invoice_task),
+        ("send_order_notification_task", send_order_notification_task),
+    ]
+
+    for task_name, task_func in task_specs:
+        task_log = None
+        try:
+            task_log = OrderBackgroundTask.objects.create(
+                order_id=order_id,
+                task_name=task_name,
+                status=OrderBackgroundTask.Status.QUEUED,
+                message="Background task queued after checkout commit.",
+            )
+            async_result = task_func.delay(order_id, background_task_id=task_log.id)
+            task_log.celery_task_id = async_result.id
+            task_log.save(update_fields=["celery_task_id", "updated_at"])
+        except Exception as exc:
+            if task_log is not None:
+                task_log.status = OrderBackgroundTask.Status.FAILURE
+                task_log.message = "Background task dispatch failed after checkout commit."
+                task_log.error_message = str(exc)
+                task_log.save(update_fields=["status", "message", "error_message", "updated_at"])
+            print(f"Order {order_id} was saved, but {task_name} dispatch failed: {exc}")
 
 
 class CheckoutView(APIView):
@@ -157,6 +176,7 @@ class CheckoutView(APIView):
                 "total_price": str(order.total_price),
                 "status": order.status,
                 "message": "Checkout completed successfully.",
+                "background_tasks_dispatched": True,
             },
             status=status.HTTP_201_CREATED,
         )

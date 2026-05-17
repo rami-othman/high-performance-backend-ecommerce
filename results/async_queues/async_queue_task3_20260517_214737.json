@@ -1,0 +1,85 @@
+{
+  "api_base_url": "http://127.0.0.1:8000",
+  "product_id": 7,
+  "product_name": "Async Queue Test Product",
+  "user_id": 474,
+  "username": "async_queue_user_20260517214735",
+  "order_id": 135,
+  "checkout_response": {
+    "order_id": 135,
+    "total_price": "10.00",
+    "status": "paid",
+    "message": "Checkout completed successfully.",
+    "background_tasks_dispatched": true
+  },
+  "checkout_started_at": "2026-05-17T21:47:36.108648+00:00",
+  "checkout_completed_at": "2026-05-17T21:47:36.180214+00:00",
+  "summary": {
+    "checkout_status": 201,
+    "checkout_duration_ms": 71.43,
+    "background_task_count": 2,
+    "successful_background_task_count": 2,
+    "failed_background_task_count": 0,
+    "total_background_duration_ms": 2016,
+    "task_names": [
+      "generate_invoice_task",
+      "send_order_notification_task"
+    ],
+    "celery_task_ids_present": true,
+    "task_timestamps_present": true,
+    "checkout_returned_before_tasks_finished": true,
+    "checkout_faster_than_background": true,
+    "order_exists": true,
+    "payment_exists": true,
+    "stock_reduced": true,
+    "server_error": false,
+    "passed": true
+  },
+  "database_state": {
+    "order_exists": true,
+    "payment_exists": true,
+    "final_stock": 4,
+    "stock_reduced": true
+  },
+  "background_tasks": [
+    {
+      "id": 1,
+      "order_id": 135,
+      "task_name": "generate_invoice_task",
+      "celery_task_id": "1a99469d-e20b-4671-8439-c1271b08c9b0",
+      "status": "success",
+      "started_at": "2026-05-17T21:47:36.196691+00:00",
+      "finished_at": "2026-05-17T21:47:37.206129+00:00",
+      "duration_ms": 1009,
+      "message": "Invoice metadata generated.",
+      "error_message": "",
+      "metadata": {
+        "order_id": 135,
+        "items_count": 1,
+        "total_price": "10.00",
+        "generated_at": "2026-05-17T21:47:37.206117+00:00",
+        "invoice_number": "INV-135"
+      }
+    },
+    {
+      "id": 2,
+      "order_id": 135,
+      "task_name": "send_order_notification_task",
+      "celery_task_id": "333c6460-7730-4bed-b07c-211158b4b48c",
+      "status": "success",
+      "started_at": "2026-05-17T21:47:36.195979+00:00",
+      "finished_at": "2026-05-17T21:47:37.203551+00:00",
+      "duration_ms": 1007,
+      "message": "Order confirmation notification simulated.",
+      "error_message": "",
+      "metadata": {
+        "email": "async_queue_user_20260517214735@example.com",
+        "sent_at": "2026-05-17T21:47:37.203505+00:00",
+        "order_id": 135,
+        "username": "async_queue_user_20260517214735",
+        "message_type": "order_confirmation"
+      }
+    }
+  ],
+  "created_at": "2026-05-17T21:47:37"
+}
