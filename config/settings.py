@@ -7,6 +7,10 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env")
 
+
+def env_bool(name, default):
+    return os.getenv(name, str(default)).lower() in {"1", "true", "yes", "on"}
+
 SECRET_KEY = os.getenv("SECRET_KEY", "dev-only-change-me")
 DEBUG = os.getenv("DEBUG", "True").lower() == "true"
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,0.0.0.0").split(",")
@@ -98,6 +102,15 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticatedOrReadOnly",
     ],
+    "DEFAULT_THROTTLE_CLASSES": [
+        "rest_framework.throttling.ScopedRateThrottle",
+    ],
+    "DEFAULT_THROTTLE_RATES": {
+        "auth": "30/min",
+        "cart": "120/min",
+        "checkout": "60/min",
+        "reports": "20/min",
+    },
 }
 
 SPECTACULAR_SETTINGS = {
@@ -116,6 +129,11 @@ REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", REDIS_URL)
 CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", REDIS_URL)
 CELERY_TASK_ALWAYS_EAGER = os.getenv("CELERY_TASK_ALWAYS_EAGER", "False").lower() == "true"
+
+CHECKOUT_MAX_CONCURRENT_REQUESTS = int(os.getenv("CHECKOUT_MAX_CONCURRENT_REQUESTS", "5"))
+CHECKOUT_CAPACITY_KEY = os.getenv("CHECKOUT_CAPACITY_KEY", "capacity:checkout:active")
+CHECKOUT_CAPACITY_TTL_SECONDS = int(os.getenv("CHECKOUT_CAPACITY_TTL_SECONDS", "30"))
+CHECKOUT_CAPACITY_TEST_DELAY_ENABLED = env_bool("CHECKOUT_CAPACITY_TEST_DELAY_ENABLED", DEBUG)
 
 CACHES = {
     "default": {

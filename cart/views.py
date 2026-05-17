@@ -15,6 +15,7 @@ def get_or_create_user_cart(user):
 
 class CartDetailView(APIView):
     permission_classes = [IsAuthenticated]
+    throttle_scope = "cart"
 
     def get(self, request):
         cart = get_or_create_user_cart(request.user)
@@ -24,6 +25,7 @@ class CartDetailView(APIView):
 
 class CartItemCreateView(APIView):
     permission_classes = [IsAuthenticated]
+    throttle_scope = "cart"
 
     def post(self, request):
         cart = get_or_create_user_cart(request.user)
@@ -44,6 +46,7 @@ class CartItemCreateView(APIView):
 
 class CartItemDetailView(APIView):
     permission_classes = [IsAuthenticated]
+    throttle_scope = "cart"
 
     def patch(self, request, item_id):
         cart = get_or_create_user_cart(request.user)

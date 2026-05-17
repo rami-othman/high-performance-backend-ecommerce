@@ -89,6 +89,7 @@ The response includes `user`, `access`, and `refresh`. API POST requests should 
 | POST | `/api/reports/daily-sales/run/` | Dispatch daily sales report task |
 | GET | `/api/reports/daily-sales/` | List daily sales reports |
 | GET | `/api/performance/logs/` | List recent performance logs |
+| GET | `/api/performance/capacity/` | Admin checkout capacity metrics |
 | GET | `/api/health/` | Health check |
 | GET | `/api/server-info/` | Return server name and hostname |
 | GET | `/api/schema/` | OpenAPI schema |
@@ -195,6 +196,95 @@ Bearer <access_token>
 7. Click checkout.
 8. View created orders at `/ui/orders/`.
 
+## Task 1 - Concurrent Access & Data Integrity
+
+Task 1 proves that checkout protects shared inventory data when many users buy the same product at the same time.
+
+Chosen approach:
+
+- Pessimistic locking
+- `transaction.atomic()`
+- PostgreSQL row-level locks with `select_for_update()`
+
+Key files:
+
+- `orders/views.py`: checkout transaction, cart lock, product row locks, stock update, and post-commit Celery dispatch
+- `scripts/race_condition_test.py`: HTTP concurrency proof script
+- `docs/TASK_1_CONCURRENT_ACCESS.md`: report-ready explanation for Task 1
+
+Run the proof script while the Django server is already running:
+
+```bash
+python scripts/race_condition_test.py
+```
+
+Optional configuration:
+
+```bash
+python scripts/race_condition_test.py --users 20 --stock 5 --quantity 1
+API_BASE_URL=http://127.0.0.1:8000 python scripts/race_condition_test.py
+```
+
+Expected default result:
+
+- Initial stock: `5`
+- Concurrent users: `20`
+- Successful checkouts: `5`
+- Failed checkouts: `15`
+- Final stock: `0`
+- Negative stock: `No`
+- Overselling: `No`
+- Result: `PASSED`
+
+The script saves proof output in `results/race_condition_task1_latest.json` and a timestamped JSON file.
+
+## Task 2 - Resource Management & Capacity Control
+
+Task 2 proves that checkout controls parallel work instead of allowing unlimited concurrent checkout operations to reach the database.
+
+Chosen approach:
+
+- Redis-backed active checkout counter
+- Configurable checkout concurrency limit
+- Clean `429` overload response when the limit is reached
+- DRF scoped throttling for auth, cart, checkout, and reports
+- Gunicorn `gthread` workers so the web container can process enough parallel requests to exercise the limiter
+
+Key files:
+
+- `performance/capacity_limiter.py`: Redis-backed checkout capacity limiter and metrics helpers
+- `orders/views.py`: checkout capacity wrapper around the existing transactional checkout
+- `scripts/resource_capacity_test.py`: HTTP concurrency proof script
+- `scripts/start_web.sh`: Docker web startup with configurable Gunicorn concurrency
+- `docs/PROJECT_DOCUMENTATION.md`: main report documentation, including Task 2
+
+Run the proof script while the Django server is already running:
+
+```bash
+python scripts/resource_capacity_test.py
+```
+
+Docker example:
+
+```bash
+docker compose up --build
+docker compose exec web python scripts/resource_capacity_test.py
+```
+
+The Docker web container runs Gunicorn with `gthread`, `WEB_CONCURRENCY=8`, and `GUNICORN_THREADS=2` by default. That gives an effective request capacity of `16`, which is intentionally higher than `CHECKOUT_MAX_CONCURRENT_REQUESTS=5` so the Redis limiter can reject overload during the proof.
+
+Expected default result:
+
+- Configured checkout limit: `5`
+- Concurrent users: `20`
+- Initial stock: `100`
+- Max observed active checkouts: `> 1` and `<= 5`
+- Capacity rejections: greater than `0`
+- Server errors: `0`
+- Result: `PASSED`
+
+The proof script uses the `X-Capacity-Test-Delay` header only in `DEBUG=True` proof/demo mode so concurrent requests overlap reliably. The script saves proof output in `results/resource_capacity/resource_capacity_task2_latest.json` and a timestamped JSON file.
+
 ## Run With Docker
 
 Create `.env` first:
@@ -232,10 +322,20 @@ http://127.0.0.1:8000/api/docs/
 - Authenticated cart API
 - Authenticated order API
 - Checkout with `transaction.atomic()`
-- Product row locking with `select_for_update()` during checkout
+- User cart row locking with `select_for_update()` during checkout
+- Product row locking with `select_for_update()` in deterministic `id` order during checkout
+- Task 1 race-condition proof script for concurrent checkout
+- Task 1 documentation for concurrent access and data integrity
+- Redis-backed checkout capacity limiter
+- DRF scoped throttling for auth, cart, checkout, and reports
+- Configurable Gunicorn `gthread` web concurrency for capacity testing
+- Task 2 resource capacity proof script
+- Main project documentation in `docs/PROJECT_DOCUMENTATION.md`
 - Payment creation during checkout
 - Cart clearing after checkout
-- Placeholder Celery tasks for invoices, order notification, and daily sales report
+- Placeholder Celery tasks for invoices and order notifications dispatched after transaction commit
+- Placeholder Celery task for daily sales reports
+- Basic automated checkout API test
 - Redis configured as Celery broker, result backend, and Django cache backend
 - Request duration middleware with database logging
 - Health and server-info endpoints
@@ -248,8 +348,8 @@ http://127.0.0.1:8000/api/docs/
 
 ## TODO
 
-- Add automated tests for API behavior and checkout race conditions
-- Strengthen race condition tests around checkout stock locking
+- Implement Task 3 asynchronous queue proof
+- Expand automated tests for API behavior
 - Add Redis caching to product list/detail endpoints
 - Add batch report chunking for large order tables
 - Add resource capacity controls such as checkout throttling or worker limits
@@ -261,8 +361,8 @@ http://127.0.0.1:8000/api/docs/
 
 ## Parallel Programming Coverage Plan
 
-- Race Condition Protection: checkout already locks product rows with `select_for_update()` inside `transaction.atomic()`.
-- Resource Management: later add DRF throttling, Celery worker concurrency limits, and connection pool tuning.
+- Race Condition Protection: checkout locks the user's cart row inside `transaction.atomic()` before reading cart items, then locks product rows with `select_for_update()` in deterministic `id` order. Order invoice and notification Celery tasks are dispatched with `transaction.on_commit()` so workers only see committed orders. This prepares the project for checkout race-condition testing.
+- Resource Management: checkout uses a Redis-backed active request counter to cap concurrent checkout operations, DRF scoped throttling for API protection, and Gunicorn `gthread` workers so the web runtime can handle enough parallel requests for the limiter proof.
 - Queues: Celery is configured with Redis and placeholder order/report tasks.
 - Batch Processing: daily sales report task is ready to evolve into chunk-based processing.
 - Load Distribution: `/api/server-info/` returns `SERVER_NAME`; later Nginx can route across multiple `web` replicas.

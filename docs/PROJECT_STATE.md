@@ -99,6 +99,7 @@ high_performance_ecommerce/
 |   |-- __init__.py
 |   |-- admin.py
 |   |-- apps.py
+|   |-- capacity_limiter.py
 |   |-- middleware.py
 |   |-- models.py
 |   |-- serializers.py
@@ -122,8 +123,13 @@ high_performance_ecommerce/
 |   |-- orders.html
 |   `-- dashboard.html
 |-- docs/
-|   `-- PROJECT_STATE.md
+|   |-- PROJECT_DOCUMENTATION.md
+|   |-- PROJECT_STATE.md
+|   `-- TASK_1_CONCURRENT_ACCESS.md
 |-- scripts/
+|   |-- race_condition_test.py
+|   |-- resource_capacity_test.py
+|   |-- start_web.sh
 |   `-- seed_data.py
 |-- manage.py
 |-- requirements.txt
@@ -244,6 +250,7 @@ high_performance_ecommerce/
 ### Performance/System API
 
 - `GET /api/performance/logs/`
+- `GET /api/performance/capacity/`
 - `GET /api/health/`
 - `GET /api/server-info/`
 
@@ -285,16 +292,121 @@ A simple Django template UI has been added under `/ui/`. It uses Bootstrap CDN, 
 
 Checkout currently:
 
-1. Reads the authenticated user's cart items.
-2. Enters `transaction.atomic()`.
-3. Locks selected product rows with `select_for_update()`.
-4. Validates stock.
-5. Creates an order.
-6. Creates order items.
-7. Reduces product stock and increments product version.
-8. Creates a completed payment record.
-9. Clears the cart.
-10. Dispatches placeholder Celery tasks after the transaction succeeds.
+1. Enters `transaction.atomic()` before checkout reads or writes.
+2. Locks the authenticated user's cart with `select_for_update()`.
+3. Reads cart items only after the cart lock is held.
+4. Locks selected product rows with `select_for_update()` in deterministic `id` order.
+5. Validates that all products still exist and that stock is available.
+6. Creates an order only after validation passes.
+7. Creates order items.
+8. Reduces product stock and increments product version.
+9. Creates a completed payment record.
+10. Clears the cart.
+11. Dispatches placeholder Celery invoice and notification tasks with `transaction.on_commit()` after the transaction succeeds.
+
+This prepares checkout for race-condition testing by preventing duplicate checkout from the same locked cart and by serializing concurrent stock updates on locked product rows.
+
+## Task 1 - Concurrent Access & Data Integrity
+
+Task 1 is now implemented and provable.
+
+The chosen solution is pessimistic locking:
+
+- `transaction.atomic()` wraps the checkout read/write flow.
+- The user's cart row is locked with `select_for_update()` before cart items are read.
+- Product rows are locked with `select_for_update()` in deterministic `id` order before stock validation and stock reduction.
+- Celery invoice and notification tasks are registered with `transaction.on_commit()`.
+
+The race condition proof script is:
+
+```text
+scripts/race_condition_test.py
+```
+
+The script uses Django ORM to create/reset only test data for `race_user_*` users and the Race Condition Test Product. It uses real HTTP requests to obtain JWT tokens and call `POST /api/orders/checkout/` concurrently.
+
+Default proof scenario:
+
+- Initial stock: `5`
+- Concurrent users: `20`
+- Quantity per user: `1`
+- Expected successful checkouts: `5`
+- Expected failed checkouts: `15`
+- Expected final stock: `0`
+- No negative stock
+- No overselling
+
+The Task 1 documentation is:
+
+```text
+docs/TASK_1_CONCURRENT_ACCESS.md
+```
+
+Result files are written to:
+
+```text
+results/race_condition_task1_latest.json
+results/race_condition_task1_YYYYMMDD_HHMMSS.json
+```
+
+## Task 2 - Resource Management & Capacity Control
+
+Task 2 is now implemented and provable.
+
+The chosen solution is a Redis-backed checkout capacity limiter:
+
+- `performance/capacity_limiter.py` keeps a shared active checkout counter in Redis.
+- `orders/views.py` acquires a checkout capacity slot before running the existing transactional checkout.
+- If the checkout limit is exceeded, the API returns `429` with code `checkout_capacity_exceeded`.
+- If Redis is unavailable, checkout returns `503` instead of crashing with a server error.
+- Capacity metrics are available at admin-only `GET /api/performance/capacity/`.
+- DRF scoped throttling is configured for `auth`, `cart`, `checkout`, and `reports`.
+- Docker web startup uses Gunicorn `gthread` workers through `scripts/start_web.sh`.
+- Default web request capacity is `WEB_CONCURRENCY * GUNICORN_THREADS = 8 * 2 = 16`, which is higher than the checkout limit so the proof can produce real overlap and `429` overload responses.
+
+Environment settings:
+
+```text
+CHECKOUT_MAX_CONCURRENT_REQUESTS=5
+CHECKOUT_CAPACITY_KEY=capacity:checkout:active
+CHECKOUT_CAPACITY_TTL_SECONDS=30
+CHECKOUT_CAPACITY_TEST_DELAY_ENABLED=True when DEBUG=True, otherwise False
+WEB_CONCURRENCY=8
+GUNICORN_THREADS=2
+GUNICORN_TIMEOUT=120
+```
+
+The resource capacity proof script is:
+
+```text
+scripts/resource_capacity_test.py
+```
+
+Default proof scenario:
+
+- Configured checkout limit: `5`
+- Concurrent users: `20`
+- Initial stock: `100`
+- Quantity per user: `1`
+- Expected max observed active checkouts: `> 1` and `<= 5`
+- Expected capacity rejections: greater than `0`
+- Expected server errors: `0`
+- Expected result: `PASSED`
+
+The Task 2 proof originally showed `max_observed_active_checkouts=1` because the Docker web container was running Gunicorn with default single sync worker behavior. Task 2 proof was fixed by configuring Gunicorn concurrency with `gthread` workers and environment-driven worker/thread counts.
+
+The main report documentation is:
+
+```text
+docs/PROJECT_DOCUMENTATION.md
+```
+
+Task 2 result files are written to:
+
+```text
+results/resource_capacity/resource_capacity_task2_latest.json
+results/resource_capacity/resource_capacity_task2_YYYYMMDD_HHMMSS.json
+```
 
 ## Next Tasks
 
@@ -306,8 +418,8 @@ Checkout currently:
 6. Seed sample products.
 7. Test Swagger endpoints manually.
 8. Test the full UI flow from `/ui/register/` to checkout.
-9. Add automated API tests.
-10. Strengthen race condition testing around checkout stock locking.
+9. Implement Task 3: Asynchronous Queues.
+10. Expand automated API tests.
 11. Add Redis caching to product endpoints.
 12. Make batch processing chunk-based.
 13. Add resource limits such as throttling and worker concurrency caps.
@@ -331,4 +443,4 @@ Checkout currently:
 
 ## Important Notes
 
-The project is intentionally simple at this stage. The checkout path includes the main transaction and locking points needed for later race-condition testing. Performance logging is basic and database-backed so benchmarking can start early, but it may later need buffering or sampling to reduce overhead under heavy load.
+The project is intentionally simple at this stage. Task 1 is implemented with the checkout transaction, cart lock, deterministic product locking, post-commit Celery dispatch, a race-condition proof script, and report-ready documentation. Task 2 is implemented with a Redis-backed checkout capacity limiter, scoped DRF throttling, capacity metrics, a resource capacity proof script, and main project documentation. The next non-functional requirement is Task 3 - Asynchronous Queues. Performance logging is basic and database-backed so benchmarking can start early, but it may later need buffering or sampling to reduce overhead under heavy load.

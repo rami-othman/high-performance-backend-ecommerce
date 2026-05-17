@@ -10,6 +10,7 @@ from .tasks import process_daily_sales_report_task
 
 class DailySalesReportRunView(APIView):
     permission_classes = [IsAdminUser]
+    throttle_scope = "reports"
 
     def post(self, request):
         task = process_daily_sales_report_task.delay()
@@ -18,6 +19,7 @@ class DailySalesReportRunView(APIView):
 
 class DailySalesReportListView(APIView):
     permission_classes = [IsAdminUser]
+    throttle_scope = "reports"
 
     def get(self, request):
         reports = DailySalesReport.objects.select_related("best_selling_product")

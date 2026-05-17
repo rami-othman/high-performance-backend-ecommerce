@@ -1,0 +1,316 @@
+{
+  "api_base_url": "http://127.0.0.1:8000",
+  "product_id": 6,
+  "product_name": "Resource Capacity Test Product",
+  "capacity_metrics": {
+    "checkout_limit": 5,
+    "active_checkouts": 0,
+    "max_observed_active_checkouts": 1
+  },
+  "summary": {
+    "configured_checkout_limit": 5,
+    "concurrent_users": 20,
+    "initial_stock": 100,
+    "quantity_per_user": 1,
+    "successful_checkouts": 20,
+    "capacity_rejected_count": 0,
+    "other_failed_requests": 0,
+    "server_errors": 0,
+    "final_stock": 80,
+    "total_sold_quantity": 20,
+    "successful_order_count": 20,
+    "payment_count": 20,
+    "max_observed_active_checkouts": 1,
+    "limit_respected": true,
+    "passed": false
+  },
+  "database_state": {
+    "final_stock": 80,
+    "successful_order_count": 20,
+    "total_sold_quantity": 20,
+    "payment_count": 20
+  },
+  "checkout_results": [
+    {
+      "username": "capacity_user_001",
+      "status_code": 201,
+      "response": {
+        "order_id": 101,
+        "total_price": "10.00",
+        "status": "paid",
+        "message": "Checkout completed successfully."
+      },
+      "duration_ms": 5280.46,
+      "success": true,
+      "capacity_rejected": false,
+      "server_error": false
+    },
+    {
+      "username": "capacity_user_002",
+      "status_code": 201,
+      "response": {
+        "order_id": 100,
+        "total_price": "10.00",
+        "status": "paid",
+        "message": "Checkout completed successfully."
+      },
+      "duration_ms": 4243.64,
+      "success": true,
+      "capacity_rejected": false,
+      "server_error": false
+    },
+    {
+      "username": "capacity_user_003",
+      "status_code": 201,
+      "response": {
+        "order_id": 115,
+        "total_price": "10.00",
+        "status": "paid",
+        "message": "Checkout completed successfully."
+      },
+      "duration_ms": 19913.36,
+      "success": true,
+      "capacity_rejected": false,
+      "server_error": false
+    },
+    {
+      "username": "capacity_user_004",
+      "status_code": 201,
+      "response": {
+        "order_id": 97,
+        "total_price": "10.00",
+        "status": "paid",
+        "message": "Checkout completed successfully."
+      },
+      "duration_ms": 1105.3,
+      "success": true,
+      "capacity_rejected": false,
+      "server_error": false
+    },
+    {
+      "username": "capacity_user_005",
+      "status_code": 201,
+      "response": {
+        "order_id": 107,
+        "total_price": "10.00",
+        "status": "paid",
+        "message": "Checkout completed successfully."
+      },
+      "duration_ms": 11636.01,
+      "success": true,
+      "capacity_rejected": false,
+      "server_error": false
+    },
+    {
+      "username": "capacity_user_006",
+      "status_code": 201,
+      "response": {
+        "order_id": 98,
+        "total_price": "10.00",
+        "status": "paid",
+        "message": "Checkout completed successfully."
+      },
+      "duration_ms": 2145.54,
+      "success": true,
+      "capacity_rejected": false,
+      "server_error": false
+    },
+    {
+      "username": "capacity_user_007",
+      "status_code": 201,
+      "response": {
+        "order_id": 114,
+        "total_price": "10.00",
+        "status": "paid",
+        "message": "Checkout completed successfully."
+      },
+      "duration_ms": 18838.53,
+      "success": true,
+      "capacity_rejected": false,
+      "server_error": false
+    },
+    {
+      "username": "capacity_user_008",
+      "status_code": 201,
+      "response": {
+        "order_id": 102,
+        "total_price": "10.00",
+        "status": "paid",
+        "message": "Checkout completed successfully."
+      },
+      "duration_ms": 6313.39,
+      "success": true,
+      "capacity_rejected": false,
+      "server_error": false
+    },
+    {
+      "username": "capacity_user_009",
+      "status_code": 201,
+      "response": {
+        "order_id": 113,
+        "total_price": "10.00",
+        "status": "paid",
+        "message": "Checkout completed successfully."
+      },
+      "duration_ms": 17811.78,
+      "success": true,
+      "capacity_rejected": false,
+      "server_error": false
+    },
+    {
+      "username": "capacity_user_010",
+      "status_code": 201,
+      "response": {
+        "order_id": 112,
+        "total_price": "10.00",
+        "status": "paid",
+        "message": "Checkout completed successfully."
+      },
+      "duration_ms": 16779.32,
+      "success": true,
+      "capacity_rejected": false,
+      "server_error": false
+    },
+    {
+      "username": "capacity_user_011",
+      "status_code": 201,
+      "response": {
+        "order_id": 108,
+        "total_price": "10.00",
+        "status": "paid",
+        "message": "Checkout completed successfully."
+      },
+      "duration_ms": 12664.7,
+      "success": true,
+      "capacity_rejected": false,
+      "server_error": false
+    },
+    {
+      "username": "capacity_user_012",
+      "status_code": 201,
+      "response": {
+        "order_id": 110,
+        "total_price": "10.00",
+        "status": "paid",
+        "message": "Checkout completed successfully."
+      },
+      "duration_ms": 14721.09,
+      "success": true,
+      "capacity_rejected": false,
+      "server_error": false
+    },
+    {
+      "username": "capacity_user_013",
+      "status_code": 201,
+      "response": {
+        "order_id": 103,
+        "total_price": "10.00",
+        "status": "paid",
+        "message": "Checkout completed successfully."
+      },
+      "duration_ms": 7343.18,
+      "success": true,
+      "capacity_rejected": false,
+      "server_error": false
+    },
+    {
+      "username": "capacity_user_014",
+      "status_code": 201,
+      "response": {
+        "order_id": 109,
+        "total_price": "10.00",
+        "status": "paid",
+        "message": "Checkout completed successfully."
+      },
+      "duration_ms": 13690.43,
+      "success": true,
+      "capacity_rejected": false,
+      "server_error": false
+    },
+    {
+      "username": "capacity_user_015",
+      "status_code": 201,
+      "response": {
+        "order_id": 111,
+        "total_price": "10.00",
+        "status": "paid",
+        "message": "Checkout completed successfully."
+      },
+      "duration_ms": 15749.46,
+      "success": true,
+      "capacity_rejected": false,
+      "server_error": false
+    },
+    {
+      "username": "capacity_user_016",
+      "status_code": 201,
+      "response": {
+        "order_id": 99,
+        "total_price": "10.00",
+        "status": "paid",
+        "message": "Checkout completed successfully."
+      },
+      "duration_ms": 3186.47,
+      "success": true,
+      "capacity_rejected": false,
+      "server_error": false
+    },
+    {
+      "username": "capacity_user_017",
+      "status_code": 201,
+      "response": {
+        "order_id": 116,
+        "total_price": "10.00",
+        "status": "paid",
+        "message": "Checkout completed successfully."
+      },
+      "duration_ms": 20952.64,
+      "success": true,
+      "capacity_rejected": false,
+      "server_error": false
+    },
+    {
+      "username": "capacity_user_018",
+      "status_code": 201,
+      "response": {
+        "order_id": 104,
+        "total_price": "10.00",
+        "status": "paid",
+        "message": "Checkout completed successfully."
+      },
+      "duration_ms": 8370.05,
+      "success": true,
+      "capacity_rejected": false,
+      "server_error": false
+    },
+    {
+      "username": "capacity_user_019",
+      "status_code": 201,
+      "response": {
+        "order_id": 105,
+        "total_price": "10.00",
+        "status": "paid",
+        "message": "Checkout completed successfully."
+      },
+      "duration_ms": 9401.48,
+      "success": true,
+      "capacity_rejected": false,
+      "server_error": false
+    },
+    {
+      "username": "capacity_user_020",
+      "status_code": 201,
+      "response": {
+        "order_id": 106,
+        "total_price": "10.00",
+        "status": "paid",
+        "message": "Checkout completed successfully."
+      },
+      "duration_ms": 10606.6,
+      "success": true,
+      "capacity_rejected": false,
+      "server_error": false
+    }
+  ],
+  "created_at": "2026-05-17T08:58:39"
+}
