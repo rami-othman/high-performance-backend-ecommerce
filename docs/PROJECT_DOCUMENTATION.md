@@ -142,18 +142,29 @@ Task 1 proof script:
 python scripts/race_condition_test.py
 ```
 
+Task 1 is isolated from the Task 2 capacity limiter. The script sends a DEBUG-only
+`X-Race-Condition-Test-Capacity-Limit` header that raises the checkout capacity
+limit for this proof run only, so all 20 checkout attempts can reach the
+transactional stock locking and validation code. In production, the header is
+ignored because the override requires `DEBUG=True`.
+
 Default result table:
 
-| Metric               | Value  |
-| -------------------- | ------ |
-| Initial stock        | 5      |
-| Concurrent users     | 20     |
-| Successful checkouts | 5      |
-| Failed checkouts     | 15     |
-| Final stock          | 0      |
-| Result               | PASSED |
+| Metric                      | Value  |
+| --------------------------- | ------ |
+| Initial stock               | 5      |
+| Concurrent users            | 20     |
+| Successful checkouts        | 5      |
+| Failed checkouts            | 15     |
+| Insufficient stock failures | 15     |
+| Capacity rejections         | 0      |
+| Server errors               | 0      |
+| Final stock                 | 0      |
+| Result                      | PASSED |
 
 Conclusion: checkout protects `Product.stock` from overselling under concurrent requests.
+The failed requests fail because stock is exhausted, not because Task 2 capacity
+control rejected them.
 
 ## 10. Task 2 - Resource Management & Capacity Control
 

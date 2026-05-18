@@ -19,6 +19,9 @@ from .serializers import OrderSerializer
 from .tasks import generate_invoice_task, send_order_notification_task
 
 
+RACE_CONDITION_TEST_CAPACITY_LIMIT_HEADER = "X-Race-Condition-Test-Capacity-Limit"
+
+
 def dispatch_order_tasks(order_id):
     task_specs = [
         ("generate_invoice_task", generate_invoice_task),
@@ -52,7 +55,7 @@ class CheckoutView(APIView):
 
     def post(self, request):
         try:
-            with CheckoutCapacityLimiter() as capacity:
+            with CheckoutCapacityLimiter(limit=get_checkout_capacity_limit(request)) as capacity:
                 if not capacity.acquired:
                     return Response(
                         {
@@ -219,3 +222,31 @@ def apply_capacity_test_delay(request):
 
     if delay_seconds:
         time.sleep(delay_seconds)
+
+
+def get_checkout_capacity_limit(request):
+    configured_limit = settings.CHECKOUT_MAX_CONCURRENT_REQUESTS
+
+    # Task 1 proof isolation hook: in DEBUG/test environments only, the race
+    # condition proof may raise the capacity limit so all requests reach stock
+    # locking/validation. Production ignores this header even if it is sent.
+    if not (
+        settings.DEBUG
+        and getattr(settings, "CHECKOUT_CAPACITY_TEST_LIMIT_OVERRIDE_ENABLED", False)
+    ):
+        return configured_limit
+
+    raw_limit = request.headers.get(RACE_CONDITION_TEST_CAPACITY_LIMIT_HEADER)
+    if not raw_limit:
+        return configured_limit
+
+    try:
+        requested_limit = int(raw_limit)
+    except (TypeError, ValueError):
+        return configured_limit
+
+    if requested_limit <= configured_limit:
+        return configured_limit
+
+    max_limit = getattr(settings, "CHECKOUT_CAPACITY_TEST_LIMIT_MAX", 1000)
+    return min(requested_limit, max_limit)

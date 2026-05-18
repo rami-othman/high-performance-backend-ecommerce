@@ -102,9 +102,53 @@ class CheckoutTests(TestCase):
 
 
 class RaceConditionScriptTests(TestCase):
-    def test_build_summary_detects_no_overselling_for_expected_result(self):
+    def test_failure_metrics_separate_stock_failures_from_capacity_rejections(self):
+        from scripts.race_condition_test import build_failure_metrics
+
+        metrics = build_failure_metrics(
+            [
+                {
+                    "status_code": 201,
+                    "response": {"order_id": 1},
+                    "success": True,
+                },
+                {
+                    "status_code": 400,
+                    "response": {"detail": "Not enough stock for Race Condition Test Product. Available stock: 0."},
+                    "success": False,
+                },
+                {
+                    "status_code": 429,
+                    "response": {"code": "checkout_capacity_exceeded"},
+                    "success": False,
+                },
+                {
+                    "status_code": 500,
+                    "response": {"detail": "Server error"},
+                    "success": False,
+                },
+            ]
+        )
+
+        self.assertEqual(metrics["status_code_counts"], {"201": 1, "400": 1, "429": 1, "500": 1})
+        self.assertEqual(
+            metrics["error_code_counts"],
+            {"checkout_capacity_exceeded": 1, "insufficient_stock": 1, "server_error": 1},
+        )
+        self.assertEqual(metrics["insufficient_stock_count"], 1)
+        self.assertEqual(metrics["capacity_rejected_count"], 1)
+        self.assertEqual(metrics["server_error_count"], 1)
+
+    def test_build_summary_requires_stock_failures_not_capacity_failures(self):
         from scripts.race_condition_test import build_summary
 
+        failure_metrics = {
+            "status_code_counts": {"201": 5, "400": 15},
+            "error_code_counts": {"insufficient_stock": 15},
+            "insufficient_stock_count": 15,
+            "capacity_rejected_count": 0,
+            "server_error_count": 0,
+        }
         summary = build_summary(
             initial_stock=5,
             user_count=20,
@@ -115,13 +159,72 @@ class RaceConditionScriptTests(TestCase):
             successful_order_count=5,
             total_sold_quantity=5,
             payment_count=5,
+            failure_metrics=failure_metrics,
         )
 
         self.assertTrue(summary["passed"])
+        self.assertEqual(summary["actual_successful_checkouts"], 5)
         self.assertEqual(summary["expected_successful_checkouts"], 5)
         self.assertEqual(summary["expected_failed_checkouts"], 15)
+        self.assertEqual(summary["insufficient_stock_count"], 15)
+        self.assertEqual(summary["capacity_rejected_count"], 0)
+        self.assertEqual(summary["server_errors"], 0)
         self.assertFalse(summary["negative_stock"])
         self.assertFalse(summary["overselling"])
+
+    def test_build_summary_fails_when_capacity_limiter_rejects_task1_requests(self):
+        from scripts.race_condition_test import build_summary
+
+        failure_metrics = {
+            "status_code_counts": {"201": 5, "400": 10, "429": 5},
+            "error_code_counts": {"insufficient_stock": 10, "checkout_capacity_exceeded": 5},
+            "insufficient_stock_count": 10,
+            "capacity_rejected_count": 5,
+            "server_error_count": 0,
+        }
+        summary = build_summary(
+            initial_stock=5,
+            user_count=20,
+            quantity=1,
+            success_count=5,
+            failure_count=15,
+            final_stock=0,
+            successful_order_count=5,
+            total_sold_quantity=5,
+            payment_count=5,
+            failure_metrics=failure_metrics,
+        )
+
+        self.assertFalse(summary["passed"])
+        self.assertEqual(summary["capacity_rejected_count"], 5)
+
+
+class CheckoutCapacityTestLimitOverrideTests(TestCase):
+    @override_settings(
+        DEBUG=True,
+        CHECKOUT_MAX_CONCURRENT_REQUESTS=5,
+        CHECKOUT_CAPACITY_TEST_LIMIT_OVERRIDE_ENABLED=True,
+        CHECKOUT_CAPACITY_TEST_LIMIT_MAX=100,
+    )
+    def test_debug_header_can_raise_capacity_limit_for_race_condition_proof(self):
+        from orders.views import get_checkout_capacity_limit
+
+        request = SimpleNamespace(headers={"X-Race-Condition-Test-Capacity-Limit": "50"})
+
+        self.assertEqual(get_checkout_capacity_limit(request), 50)
+
+    @override_settings(
+        DEBUG=False,
+        CHECKOUT_MAX_CONCURRENT_REQUESTS=5,
+        CHECKOUT_CAPACITY_TEST_LIMIT_OVERRIDE_ENABLED=True,
+        CHECKOUT_CAPACITY_TEST_LIMIT_MAX=100,
+    )
+    def test_capacity_limit_override_is_disabled_when_debug_is_false(self):
+        from orders.views import get_checkout_capacity_limit
+
+        request = SimpleNamespace(headers={"X-Race-Condition-Test-Capacity-Limit": "50"})
+
+        self.assertEqual(get_checkout_capacity_limit(request), 5)
 
 
 class AsyncQueueScriptTests(TestCase):

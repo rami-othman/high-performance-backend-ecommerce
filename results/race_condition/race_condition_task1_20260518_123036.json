@@ -2,26 +2,14 @@
   "api_base_url": "http://127.0.0.1:8000",
   "product_id": 5,
   "product_name": "Race Condition Test Product",
-  "capacity_limit_override_requested": 50,
   "summary": {
     "initial_stock": 5,
     "concurrent_users": 20,
     "quantity_per_user": 1,
     "expected_successful_checkouts": 5,
     "expected_failed_checkouts": 15,
-    "actual_successful_checkouts": 5,
     "successful_checkouts": 5,
     "failed_checkouts": 15,
-    "status_code_counts": {
-      "201": 5,
-      "400": 15
-    },
-    "error_code_counts": {
-      "insufficient_stock": 15
-    },
-    "insufficient_stock_count": 15,
-    "capacity_rejected_count": 0,
-    "server_errors": 0,
     "final_stock": 0,
     "successful_order_count": 5,
     "total_sold_quantity": 5,
@@ -39,17 +27,12 @@
   "checkout_results": [
     {
       "username": "race_user_001",
-      "status_code": 201,
+      "status_code": 400,
       "response": {
-        "order_id": 1437,
-        "total_price": "10.00",
-        "status": "paid",
-        "message": "Checkout completed successfully.",
-        "background_tasks_dispatched": true
+        "detail": "Not enough stock for Race Condition Test Product. Available stock: 0."
       },
-      "duration_ms": 303.97,
-      "success": true,
-      "failure_reason": ""
+      "duration_ms": 471.52,
+      "success": false
     },
     {
       "username": "race_user_002",
@@ -57,33 +40,30 @@
       "response": {
         "detail": "Not enough stock for Race Condition Test Product. Available stock: 0."
       },
-      "duration_ms": 731.46,
-      "success": false,
-      "failure_reason": "insufficient_stock"
+      "duration_ms": 861.67,
+      "success": false
     },
     {
       "username": "race_user_003",
-      "status_code": 400,
-      "response": {
-        "detail": "Not enough stock for Race Condition Test Product. Available stock: 0."
-      },
-      "duration_ms": 755.14,
-      "success": false,
-      "failure_reason": "insufficient_stock"
-    },
-    {
-      "username": "race_user_004",
       "status_code": 201,
       "response": {
-        "order_id": 1438,
+        "order_id": 1420,
         "total_price": "10.00",
         "status": "paid",
         "message": "Checkout completed successfully.",
         "background_tasks_dispatched": true
       },
-      "duration_ms": 249.62,
-      "success": true,
-      "failure_reason": ""
+      "duration_ms": 426.41,
+      "success": true
+    },
+    {
+      "username": "race_user_004",
+      "status_code": 400,
+      "response": {
+        "detail": "Not enough stock for Race Condition Test Product. Available stock: 0."
+      },
+      "duration_ms": 417.37,
+      "success": false
     },
     {
       "username": "race_user_005",
@@ -91,19 +71,21 @@
       "response": {
         "detail": "Not enough stock for Race Condition Test Product. Available stock: 0."
       },
-      "duration_ms": 382.74,
-      "success": false,
-      "failure_reason": "insufficient_stock"
+      "duration_ms": 377.77,
+      "success": false
     },
     {
       "username": "race_user_006",
-      "status_code": 400,
+      "status_code": 201,
       "response": {
-        "detail": "Not enough stock for Race Condition Test Product. Available stock: 0."
+        "order_id": 1419,
+        "total_price": "10.00",
+        "status": "paid",
+        "message": "Checkout completed successfully.",
+        "background_tasks_dispatched": true
       },
-      "duration_ms": 328.12,
-      "success": false,
-      "failure_reason": "insufficient_stock"
+      "duration_ms": 344.31,
+      "success": true
     },
     {
       "username": "race_user_007",
@@ -111,9 +93,8 @@
       "response": {
         "detail": "Not enough stock for Race Condition Test Product. Available stock: 0."
       },
-      "duration_ms": 360.59,
-      "success": false,
-      "failure_reason": "insufficient_stock"
+      "duration_ms": 368.23,
+      "success": false
     },
     {
       "username": "race_user_008",
@@ -121,19 +102,21 @@
       "response": {
         "detail": "Not enough stock for Race Condition Test Product. Available stock: 0."
       },
-      "duration_ms": 636.06,
-      "success": false,
-      "failure_reason": "insufficient_stock"
+      "duration_ms": 424.95,
+      "success": false
     },
     {
       "username": "race_user_009",
-      "status_code": 400,
+      "status_code": 201,
       "response": {
-        "detail": "Not enough stock for Race Condition Test Product. Available stock: 0."
+        "order_id": 1418,
+        "total_price": "10.00",
+        "status": "paid",
+        "message": "Checkout completed successfully.",
+        "background_tasks_dispatched": true
       },
-      "duration_ms": 631.12,
-      "success": false,
-      "failure_reason": "insufficient_stock"
+      "duration_ms": 247.82,
+      "success": true
     },
     {
       "username": "race_user_010",
@@ -141,9 +124,8 @@
       "response": {
         "detail": "Not enough stock for Race Condition Test Product. Available stock: 0."
       },
-      "duration_ms": 740.39,
-      "success": false,
-      "failure_reason": "insufficient_stock"
+      "duration_ms": 469.34,
+      "success": false
     },
     {
       "username": "race_user_011",
@@ -151,19 +133,21 @@
       "response": {
         "detail": "Not enough stock for Race Condition Test Product. Available stock: 0."
       },
-      "duration_ms": 340.93,
-      "success": false,
-      "failure_reason": "insufficient_stock"
+      "duration_ms": 433.17,
+      "success": false
     },
     {
       "username": "race_user_012",
-      "status_code": 400,
+      "status_code": 201,
       "response": {
-        "detail": "Not enough stock for Race Condition Test Product. Available stock: 0."
+        "order_id": 1417,
+        "total_price": "10.00",
+        "status": "paid",
+        "message": "Checkout completed successfully.",
+        "background_tasks_dispatched": true
       },
-      "duration_ms": 637.86,
-      "success": false,
-      "failure_reason": "insufficient_stock"
+      "duration_ms": 324.4,
+      "success": true
     },
     {
       "username": "race_user_013",
@@ -171,9 +155,8 @@
       "response": {
         "detail": "Not enough stock for Race Condition Test Product. Available stock: 0."
       },
-      "duration_ms": 699.83,
-      "success": false,
-      "failure_reason": "insufficient_stock"
+      "duration_ms": 974.1,
+      "success": false
     },
     {
       "username": "race_user_014",
@@ -181,9 +164,8 @@
       "response": {
         "detail": "Not enough stock for Race Condition Test Product. Available stock: 0."
       },
-      "duration_ms": 702.06,
-      "success": false,
-      "failure_reason": "insufficient_stock"
+      "duration_ms": 449.12,
+      "success": false
     },
     {
       "username": "race_user_015",
@@ -191,37 +173,26 @@
       "response": {
         "detail": "Not enough stock for Race Condition Test Product. Available stock: 0."
       },
-      "duration_ms": 634.52,
-      "success": false,
-      "failure_reason": "insufficient_stock"
+      "duration_ms": 191.04,
+      "success": false
     },
     {
       "username": "race_user_016",
-      "status_code": 201,
+      "status_code": 400,
       "response": {
-        "order_id": 1435,
-        "total_price": "10.00",
-        "status": "paid",
-        "message": "Checkout completed successfully.",
-        "background_tasks_dispatched": true
+        "detail": "Not enough stock for Race Condition Test Product. Available stock: 0."
       },
-      "duration_ms": 295.06,
-      "success": true,
-      "failure_reason": ""
+      "duration_ms": 824.08,
+      "success": false
     },
     {
       "username": "race_user_017",
-      "status_code": 201,
+      "status_code": 400,
       "response": {
-        "order_id": 1436,
-        "total_price": "10.00",
-        "status": "paid",
-        "message": "Checkout completed successfully.",
-        "background_tasks_dispatched": true
+        "detail": "Not enough stock for Race Condition Test Product. Available stock: 0."
       },
-      "duration_ms": 314.4,
-      "success": true,
-      "failure_reason": ""
+      "duration_ms": 391.87,
+      "success": false
     },
     {
       "username": "race_user_018",
@@ -229,34 +200,31 @@
       "response": {
         "detail": "Not enough stock for Race Condition Test Product. Available stock: 0."
       },
-      "duration_ms": 756.18,
-      "success": false,
-      "failure_reason": "insufficient_stock"
+      "duration_ms": 821.9,
+      "success": false
     },
     {
       "username": "race_user_019",
-      "status_code": 400,
-      "response": {
-        "detail": "Not enough stock for Race Condition Test Product. Available stock: 0."
-      },
-      "duration_ms": 344.59,
-      "success": false,
-      "failure_reason": "insufficient_stock"
-    },
-    {
-      "username": "race_user_020",
       "status_code": 201,
       "response": {
-        "order_id": 1434,
+        "order_id": 1416,
         "total_price": "10.00",
         "status": "paid",
         "message": "Checkout completed successfully.",
         "background_tasks_dispatched": true
       },
-      "duration_ms": 270.88,
-      "success": true,
-      "failure_reason": ""
+      "duration_ms": 225.19,
+      "success": true
+    },
+    {
+      "username": "race_user_020",
+      "status_code": 400,
+      "response": {
+        "detail": "Not enough stock for Race Condition Test Product. Available stock: 0."
+      },
+      "duration_ms": 491.35,
+      "success": false
     }
   ],
-  "created_at": "2026-05-18T13:01:03"
+  "created_at": "2026-05-18T12:30:36"
 }

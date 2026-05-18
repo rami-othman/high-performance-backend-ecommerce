@@ -1,0 +1,245 @@
+{
+  "api_base_url": "http://127.0.0.1:8000",
+  "product_id": 5,
+  "product_name": "Race Condition Test Product",
+  "summary": {
+    "initial_stock": 5,
+    "concurrent_users": 20,
+    "quantity_per_user": 1,
+    "expected_successful_checkouts": 5,
+    "expected_failed_checkouts": 15,
+    "successful_checkouts": 5,
+    "failed_checkouts": 15,
+    "final_stock": 0,
+    "successful_order_count": 5,
+    "total_sold_quantity": 5,
+    "payment_count": 5,
+    "negative_stock": false,
+    "overselling": false,
+    "passed": true
+  },
+  "database_state": {
+    "final_stock": 0,
+    "successful_order_count": 5,
+    "total_sold_quantity": 5,
+    "payment_count": 5
+  },
+  "checkout_results": [
+    {
+      "username": "race_user_001",
+      "status_code": 429,
+      "response": {
+        "detail": "Checkout service is busy. Please retry shortly.",
+        "code": "checkout_capacity_exceeded"
+      },
+      "duration_ms": 202.27,
+      "success": false
+    },
+    {
+      "username": "race_user_002",
+      "status_code": 429,
+      "response": {
+        "detail": "Checkout service is busy. Please retry shortly.",
+        "code": "checkout_capacity_exceeded"
+      },
+      "duration_ms": 575.14,
+      "success": false
+    },
+    {
+      "username": "race_user_003",
+      "status_code": 429,
+      "response": {
+        "detail": "Checkout service is busy. Please retry shortly.",
+        "code": "checkout_capacity_exceeded"
+      },
+      "duration_ms": 126.07,
+      "success": false
+    },
+    {
+      "username": "race_user_004",
+      "status_code": 429,
+      "response": {
+        "detail": "Checkout service is busy. Please retry shortly.",
+        "code": "checkout_capacity_exceeded"
+      },
+      "duration_ms": 111.75,
+      "success": false
+    },
+    {
+      "username": "race_user_005",
+      "status_code": 201,
+      "response": {
+        "order_id": 1141,
+        "total_price": "10.00",
+        "status": "paid",
+        "message": "Checkout completed successfully.",
+        "background_tasks_dispatched": true
+      },
+      "duration_ms": 2442.4,
+      "success": true
+    },
+    {
+      "username": "race_user_006",
+      "status_code": 429,
+      "response": {
+        "detail": "Checkout service is busy. Please retry shortly.",
+        "code": "checkout_capacity_exceeded"
+      },
+      "duration_ms": 501.46,
+      "success": false
+    },
+    {
+      "username": "race_user_007",
+      "status_code": 201,
+      "response": {
+        "order_id": 1144,
+        "total_price": "10.00",
+        "status": "paid",
+        "message": "Checkout completed successfully.",
+        "background_tasks_dispatched": true
+      },
+      "duration_ms": 2562.41,
+      "success": true
+    },
+    {
+      "username": "race_user_008",
+      "status_code": 429,
+      "response": {
+        "detail": "Checkout service is busy. Please retry shortly.",
+        "code": "checkout_capacity_exceeded"
+      },
+      "duration_ms": 374.34,
+      "success": false
+    },
+    {
+      "username": "race_user_009",
+      "status_code": 201,
+      "response": {
+        "order_id": 1142,
+        "total_price": "10.00",
+        "status": "paid",
+        "message": "Checkout completed successfully.",
+        "background_tasks_dispatched": true
+      },
+      "duration_ms": 2513.33,
+      "success": true
+    },
+    {
+      "username": "race_user_010",
+      "status_code": 201,
+      "response": {
+        "order_id": 1143,
+        "total_price": "10.00",
+        "status": "paid",
+        "message": "Checkout completed successfully.",
+        "background_tasks_dispatched": true
+      },
+      "duration_ms": 2436.32,
+      "success": true
+    },
+    {
+      "username": "race_user_011",
+      "status_code": 429,
+      "response": {
+        "detail": "Checkout service is busy. Please retry shortly.",
+        "code": "checkout_capacity_exceeded"
+      },
+      "duration_ms": 124.5,
+      "success": false
+    },
+    {
+      "username": "race_user_012",
+      "status_code": 429,
+      "response": {
+        "detail": "Checkout service is busy. Please retry shortly.",
+        "code": "checkout_capacity_exceeded"
+      },
+      "duration_ms": 603.17,
+      "success": false
+    },
+    {
+      "username": "race_user_013",
+      "status_code": 429,
+      "response": {
+        "detail": "Checkout service is busy. Please retry shortly.",
+        "code": "checkout_capacity_exceeded"
+      },
+      "duration_ms": 605.07,
+      "success": false
+    },
+    {
+      "username": "race_user_014",
+      "status_code": 429,
+      "response": {
+        "detail": "Checkout service is busy. Please retry shortly.",
+        "code": "checkout_capacity_exceeded"
+      },
+      "duration_ms": 427.46,
+      "success": false
+    },
+    {
+      "username": "race_user_015",
+      "status_code": 429,
+      "response": {
+        "detail": "Checkout service is busy. Please retry shortly.",
+        "code": "checkout_capacity_exceeded"
+      },
+      "duration_ms": 571.75,
+      "success": false
+    },
+    {
+      "username": "race_user_016",
+      "status_code": 429,
+      "response": {
+        "detail": "Checkout service is busy. Please retry shortly.",
+        "code": "checkout_capacity_exceeded"
+      },
+      "duration_ms": 290.72,
+      "success": false
+    },
+    {
+      "username": "race_user_017",
+      "status_code": 429,
+      "response": {
+        "detail": "Checkout service is busy. Please retry shortly.",
+        "code": "checkout_capacity_exceeded"
+      },
+      "duration_ms": 600.24,
+      "success": false
+    },
+    {
+      "username": "race_user_018",
+      "status_code": 201,
+      "response": {
+        "order_id": 1140,
+        "total_price": "10.00",
+        "status": "paid",
+        "message": "Checkout completed successfully.",
+        "background_tasks_dispatched": true
+      },
+      "duration_ms": 2452.69,
+      "success": true
+    },
+    {
+      "username": "race_user_019",
+      "status_code": 429,
+      "response": {
+        "detail": "Checkout service is busy. Please retry shortly.",
+        "code": "checkout_capacity_exceeded"
+      },
+      "duration_ms": 500.5,
+      "success": false
+    },
+    {
+      "username": "race_user_020",
+      "status_code": 429,
+      "response": {
+        "detail": "Checkout service is busy. Please retry shortly.",
+        "code": "checkout_capacity_exceeded"
+      },
+      "duration_ms": 529.42,
+      "success": false
+    }
+  ],
+  "created_at": "2026-05-18T11:41:25"
+}

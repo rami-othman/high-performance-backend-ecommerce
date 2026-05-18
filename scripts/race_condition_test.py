@@ -6,6 +6,7 @@ import threading
 import time
 import urllib.error
 import urllib.request
+from collections import Counter
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from decimal import Decimal
@@ -31,11 +32,13 @@ from django.db.models import Sum
 from cart.models import Cart, CartItem
 from orders.models import Order, OrderItem
 from payments.models import Payment
+from performance.capacity_limiter import CheckoutCapacityUnavailable, reset_checkout_capacity_metrics
 from products.models import Product
 
 
 DEFAULT_BASE_URL = "http://127.0.0.1:8000"
 DEFAULT_PRODUCT_NAME = "Race Condition Test Product"
+RACE_CONDITION_TEST_CAPACITY_LIMIT_HEADER = "X-Race-Condition-Test-Capacity-Limit"
 RACE_USERNAME_PREFIX = "race_user_"
 RACE_PASSWORD = "RaceTestPassword123!"
 
@@ -54,6 +57,15 @@ def parse_args():
     parser.add_argument("--users", type=int, default=20, help="Number of concurrent users.")
     parser.add_argument("--stock", type=int, default=5, help="Initial stock for the test product.")
     parser.add_argument("--quantity", type=int, default=1, help="Quantity each user tries to buy.")
+    parser.add_argument(
+        "--capacity-limit",
+        type=int,
+        default=None,
+        help=(
+            "DEBUG-only checkout capacity limit override for proof isolation. "
+            "Defaults to max(50, --users)."
+        ),
+    )
     parser.add_argument(
         "--product-name",
         default=DEFAULT_PRODUCT_NAME,
@@ -186,13 +198,16 @@ def obtain_token(base_url, username):
     return payload["access"]
 
 
-def checkout_user(base_url, username, token, barrier):
+def checkout_user(base_url, username, token, barrier, capacity_limit):
     try:
         barrier.wait(timeout=30)
         status_code, payload, duration_ms = post_json(
             f"{base_url}/api/orders/checkout/",
             {},
-            headers={"Authorization": f"Bearer {token}"},
+            headers={
+                "Authorization": f"Bearer {token}",
+                RACE_CONDITION_TEST_CAPACITY_LIMIT_HEADER: str(capacity_limit),
+            },
             timeout=30,
         )
         return {
@@ -201,6 +216,7 @@ def checkout_user(base_url, username, token, barrier):
             "response": payload,
             "duration_ms": duration_ms,
             "success": 200 <= status_code < 300,
+            "failure_reason": classify_failure(status_code, payload),
         }
     except Exception as exc:
         return {
@@ -209,23 +225,74 @@ def checkout_user(base_url, username, token, barrier):
             "response": {"error": str(exc)},
             "duration_ms": None,
             "success": False,
+            "failure_reason": "request_exception",
         }
 
 
-def run_concurrent_checkouts(base_url, users):
+def run_concurrent_checkouts(base_url, users, capacity_limit):
     tokens = {user.username: obtain_token(base_url, user.username) for user in users}
     barrier = threading.Barrier(len(users))
     results = []
 
     with ThreadPoolExecutor(max_workers=len(users)) as executor:
         futures = [
-            executor.submit(checkout_user, base_url, user.username, tokens[user.username], barrier)
+            executor.submit(
+                checkout_user,
+                base_url,
+                user.username,
+                tokens[user.username],
+                barrier,
+                capacity_limit,
+            )
             for user in users
         ]
         for future in as_completed(futures):
             results.append(future.result())
 
     return sorted(results, key=lambda item: item["username"])
+
+
+def classify_failure(status_code, payload):
+    if status_code is not None and 200 <= status_code < 300:
+        return ""
+
+    code = payload.get("code") if isinstance(payload, dict) else None
+    if code:
+        return str(code)
+
+    detail = payload.get("detail", "") if isinstance(payload, dict) else ""
+    if "not enough stock" in str(detail).lower():
+        return "insufficient_stock"
+
+    if status_code is None:
+        return "request_exception"
+    if status_code >= 500:
+        return "server_error"
+    return f"http_{status_code}"
+
+
+def build_failure_metrics(checkout_results):
+    status_code_counts = Counter(
+        str(result["status_code"]) if result.get("status_code") is not None else "no_response"
+        for result in checkout_results
+    )
+    failure_reasons = Counter(
+        result.get("failure_reason") or classify_failure(result.get("status_code"), result.get("response", {}))
+        for result in checkout_results
+        if not result.get("success")
+    )
+
+    return {
+        "status_code_counts": dict(sorted(status_code_counts.items())),
+        "error_code_counts": dict(sorted(failure_reasons.items())),
+        "insufficient_stock_count": failure_reasons.get("insufficient_stock", 0),
+        "capacity_rejected_count": failure_reasons.get("checkout_capacity_exceeded", 0),
+        "server_error_count": sum(
+            1
+            for result in checkout_results
+            if result.get("status_code") is None or result.get("status_code", 0) >= 500
+        ),
+    }
 
 
 def verify_database_state(product, users):
@@ -261,14 +328,23 @@ def build_summary(
     successful_order_count,
     total_sold_quantity,
     payment_count,
+    failure_metrics,
 ):
-    expected_success_count = min(initial_stock // quantity, user_count)
-    expected_failure_count = user_count - expected_success_count
+    expected_success_count = initial_stock
+    expected_failure_count = user_count - initial_stock
     negative_stock = final_stock < 0
     overselling = total_sold_quantity > initial_stock
+    insufficient_stock_count = failure_metrics["insufficient_stock_count"]
+    capacity_rejected_count = failure_metrics["capacity_rejected_count"]
+    server_error_count = failure_metrics["server_error_count"]
     passed = (
-        success_count == expected_success_count
+        success_count == initial_stock
         and failure_count == expected_failure_count
+        and insufficient_stock_count == expected_failure_count
+        and capacity_rejected_count == 0
+        and server_error_count == 0
+        and final_stock == 0
+        and total_sold_quantity == initial_stock
         and final_stock == initial_stock - total_sold_quantity
         and not negative_stock
         and not overselling
@@ -283,8 +359,14 @@ def build_summary(
         "quantity_per_user": quantity,
         "expected_successful_checkouts": expected_success_count,
         "expected_failed_checkouts": expected_failure_count,
+        "actual_successful_checkouts": success_count,
         "successful_checkouts": success_count,
         "failed_checkouts": failure_count,
+        "status_code_counts": failure_metrics["status_code_counts"],
+        "error_code_counts": failure_metrics["error_code_counts"],
+        "insufficient_stock_count": insufficient_stock_count,
+        "capacity_rejected_count": capacity_rejected_count,
+        "server_errors": server_error_count,
         "final_stock": final_stock,
         "successful_order_count": successful_order_count,
         "total_sold_quantity": total_sold_quantity,
@@ -316,6 +398,9 @@ def print_summary(summary):
     print(f"Quantity per user: {summary['quantity_per_user']}\n")
     print(f"Successful checkouts: {summary['successful_checkouts']}")
     print(f"Failed checkouts: {summary['failed_checkouts']}")
+    print(f"Insufficient stock failures: {summary['insufficient_stock_count']}")
+    print(f"Capacity rejections: {summary['capacity_rejected_count']}")
+    print(f"Server errors: {summary['server_errors']}")
     print(f"Final stock: {summary['final_stock']}")
     print(f"Total sold quantity: {summary['total_sold_quantity']}")
     print(f"Negative stock: {'Yes' if summary['negative_stock'] else 'No'}")
@@ -326,13 +411,16 @@ def print_summary(summary):
 def main():
     args = parse_args()
     base_url = normalize_base_url(args.base_url)
+    capacity_limit = args.capacity_limit if args.capacity_limit is not None else max(50, args.users)
 
     try:
         get_status(f"{base_url}/api/health/")
+        reset_checkout_capacity_metrics()
         product, users = setup_test_data(args.users, args.stock, args.quantity, args.product_name)
-        checkout_results = run_concurrent_checkouts(base_url, users)
+        checkout_results = run_concurrent_checkouts(base_url, users, capacity_limit)
         success_count = sum(1 for result in checkout_results if result["success"])
         failure_count = len(checkout_results) - success_count
+        failure_metrics = build_failure_metrics(checkout_results)
         db_state = verify_database_state(product, users)
         summary = build_summary(
             initial_stock=args.stock,
@@ -344,11 +432,13 @@ def main():
             successful_order_count=db_state["successful_order_count"],
             total_sold_quantity=db_state["total_sold_quantity"],
             payment_count=db_state["payment_count"],
+            failure_metrics=failure_metrics,
         )
         result = {
             "api_base_url": base_url,
             "product_id": product.id,
             "product_name": product.name,
+            "capacity_limit_override_requested": capacity_limit,
             "summary": summary,
             "database_state": db_state,
             "checkout_results": checkout_results,
@@ -361,6 +451,9 @@ def main():
         return 0 if summary["passed"] else 1
     except RaceTestError as exc:
         print(f"\nTask 1 race condition proof could not run: {exc}", file=sys.stderr)
+        return 2
+    except CheckoutCapacityUnavailable as exc:
+        print(f"\nTask 1 race condition proof could not reset capacity metrics: {exc}", file=sys.stderr)
         return 2
 
 
