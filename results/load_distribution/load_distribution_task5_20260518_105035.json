@@ -1,0 +1,1857 @@
+{
+  "summary": {
+    "load_balancer_url": "http://load_balancer",
+    "strategy": "Round Robin",
+    "total_requests": 60,
+    "successful_responses": 60,
+    "failed_responses": 0,
+    "backend_distribution": {
+      "web-1": 32,
+      "web-2": 28
+    },
+    "unique_backend_servers_reached": 2,
+    "expected_servers": [
+      "web-1",
+      "web-2",
+      "web-3"
+    ],
+    "all_expected_servers_reached": false,
+    "distribution_reasonably_balanced": true,
+    "balance_threshold": 15.0,
+    "min_backend_request_count": 28,
+    "max_backend_request_count": 32,
+    "health_endpoint_available": true,
+    "response_has_server_name": true,
+    "only_one_server_reached": false,
+    "single_server_hint": "",
+    "passed": false
+  },
+  "health_response": {
+    "status_code": 200,
+    "response": {
+      "status": "ok",
+      "server_name": "web-1",
+      "hostname": "542d59632bbd",
+      "timestamp": "2026-05-18T10:50:35.215583+00:00"
+    },
+    "headers": {
+      "server": "gunicorn",
+      "date": "Mon, 18 May 2026 10:50:35 GMT",
+      "content-type": "application/json",
+      "x-backend-server": "web-1",
+      "vary": "Accept, origin",
+      "allow": "GET, HEAD, OPTIONS",
+      "x-frame-options": "DENY",
+      "content-length": "110",
+      "x-content-type-options": "nosniff",
+      "referrer-policy": "same-origin",
+      "cross-origin-opener-policy": "same-origin",
+      "connection": "close"
+    },
+    "duration_ms": 15.37,
+    "error": ""
+  },
+  "requests": [
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-1",
+        "hostname": "542d59632bbd",
+        "process_id": 15,
+        "thread_id": 132567422465728,
+        "timestamp": "2026-05-18T10:50:35.221578+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-1",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "140",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 5.07,
+      "error": "",
+      "request_number": 1,
+      "server_name": "web-1",
+      "hostname": "542d59632bbd",
+      "backend_header": "web-1"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-1",
+        "hostname": "542d59632bbd",
+        "process_id": 14,
+        "thread_id": 132567422465728,
+        "timestamp": "2026-05-18T10:50:35.226486+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-1",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "140",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 4.83,
+      "error": "",
+      "request_number": 2,
+      "server_name": "web-1",
+      "hostname": "542d59632bbd",
+      "backend_header": "web-1"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-1",
+        "hostname": "542d59632bbd",
+        "process_id": 14,
+        "thread_id": 132567422465728,
+        "timestamp": "2026-05-18T10:50:35.229938+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-1",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "140",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 3.56,
+      "error": "",
+      "request_number": 3,
+      "server_name": "web-1",
+      "hostname": "542d59632bbd",
+      "backend_header": "web-1"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-1",
+        "hostname": "542d59632bbd",
+        "process_id": 14,
+        "thread_id": 132567422465728,
+        "timestamp": "2026-05-18T10:50:35.233442+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-1",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "140",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 3.18,
+      "error": "",
+      "request_number": 4,
+      "server_name": "web-1",
+      "hostname": "542d59632bbd",
+      "backend_header": "web-1"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-1",
+        "hostname": "542d59632bbd",
+        "process_id": 14,
+        "thread_id": 132567422465728,
+        "timestamp": "2026-05-18T10:50:35.236469+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-1",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "140",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 2.97,
+      "error": "",
+      "request_number": 5,
+      "server_name": "web-1",
+      "hostname": "542d59632bbd",
+      "backend_header": "web-1"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-2",
+        "hostname": "aa55c4ce0b1e",
+        "process_id": 8,
+        "thread_id": 136116896265920,
+        "timestamp": "2026-05-18T10:50:35.240865+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-2",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "139",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 4.4,
+      "error": "",
+      "request_number": 6,
+      "server_name": "web-2",
+      "hostname": "aa55c4ce0b1e",
+      "backend_header": "web-2"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-1",
+        "hostname": "542d59632bbd",
+        "process_id": 15,
+        "thread_id": 132567422465728,
+        "timestamp": "2026-05-18T10:50:35.244552+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-1",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "140",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 3.53,
+      "error": "",
+      "request_number": 7,
+      "server_name": "web-1",
+      "hostname": "542d59632bbd",
+      "backend_header": "web-1"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-2",
+        "hostname": "aa55c4ce0b1e",
+        "process_id": 11,
+        "thread_id": 136116896265920,
+        "timestamp": "2026-05-18T10:50:35.249188+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-2",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "140",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 4.35,
+      "error": "",
+      "request_number": 8,
+      "server_name": "web-2",
+      "hostname": "aa55c4ce0b1e",
+      "backend_header": "web-2"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-1",
+        "hostname": "542d59632bbd",
+        "process_id": 14,
+        "thread_id": 132567422465728,
+        "timestamp": "2026-05-18T10:50:35.253961+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-1",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "140",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 5.23,
+      "error": "",
+      "request_number": 9,
+      "server_name": "web-1",
+      "hostname": "542d59632bbd",
+      "backend_header": "web-1"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-2",
+        "hostname": "aa55c4ce0b1e",
+        "process_id": 8,
+        "thread_id": 136116896265920,
+        "timestamp": "2026-05-18T10:50:35.258057+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-2",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "139",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 4.15,
+      "error": "",
+      "request_number": 10,
+      "server_name": "web-2",
+      "hostname": "aa55c4ce0b1e",
+      "backend_header": "web-2"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-1",
+        "hostname": "542d59632bbd",
+        "process_id": 14,
+        "thread_id": 132567422465728,
+        "timestamp": "2026-05-18T10:50:35.262541+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-1",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "140",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 3.72,
+      "error": "",
+      "request_number": 11,
+      "server_name": "web-1",
+      "hostname": "542d59632bbd",
+      "backend_header": "web-1"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-2",
+        "hostname": "aa55c4ce0b1e",
+        "process_id": 8,
+        "thread_id": 136116896265920,
+        "timestamp": "2026-05-18T10:50:35.268468+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-2",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "139",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 5.87,
+      "error": "",
+      "request_number": 12,
+      "server_name": "web-2",
+      "hostname": "aa55c4ce0b1e",
+      "backend_header": "web-2"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-1",
+        "hostname": "542d59632bbd",
+        "process_id": 14,
+        "thread_id": 132567422465728,
+        "timestamp": "2026-05-18T10:50:35.272296+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-1",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "140",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 3.59,
+      "error": "",
+      "request_number": 13,
+      "server_name": "web-1",
+      "hostname": "542d59632bbd",
+      "backend_header": "web-1"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-2",
+        "hostname": "aa55c4ce0b1e",
+        "process_id": 8,
+        "thread_id": 136116896265920,
+        "timestamp": "2026-05-18T10:50:35.276545+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-2",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "139",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 3.7,
+      "error": "",
+      "request_number": 14,
+      "server_name": "web-2",
+      "hostname": "aa55c4ce0b1e",
+      "backend_header": "web-2"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-1",
+        "hostname": "542d59632bbd",
+        "process_id": 14,
+        "thread_id": 132567422465728,
+        "timestamp": "2026-05-18T10:50:35.279505+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-1",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "140",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 3.81,
+      "error": "",
+      "request_number": 15,
+      "server_name": "web-1",
+      "hostname": "542d59632bbd",
+      "backend_header": "web-1"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-2",
+        "hostname": "aa55c4ce0b1e",
+        "process_id": 11,
+        "thread_id": 136116896265920,
+        "timestamp": "2026-05-18T10:50:35.283033+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-2",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "140",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 2.47,
+      "error": "",
+      "request_number": 16,
+      "server_name": "web-2",
+      "hostname": "aa55c4ce0b1e",
+      "backend_header": "web-2"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-1",
+        "hostname": "542d59632bbd",
+        "process_id": 14,
+        "thread_id": 132567422465728,
+        "timestamp": "2026-05-18T10:50:35.285374+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-1",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "140",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 2.55,
+      "error": "",
+      "request_number": 17,
+      "server_name": "web-1",
+      "hostname": "542d59632bbd",
+      "backend_header": "web-1"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-2",
+        "hostname": "aa55c4ce0b1e",
+        "process_id": 11,
+        "thread_id": 136116896265920,
+        "timestamp": "2026-05-18T10:50:35.288158+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-2",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "140",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 2.37,
+      "error": "",
+      "request_number": 18,
+      "server_name": "web-2",
+      "hostname": "aa55c4ce0b1e",
+      "backend_header": "web-2"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-1",
+        "hostname": "542d59632bbd",
+        "process_id": 14,
+        "thread_id": 132567422465728,
+        "timestamp": "2026-05-18T10:50:35.290298+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-1",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "140",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 2.04,
+      "error": "",
+      "request_number": 19,
+      "server_name": "web-1",
+      "hostname": "542d59632bbd",
+      "backend_header": "web-1"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-2",
+        "hostname": "aa55c4ce0b1e",
+        "process_id": 11,
+        "thread_id": 136116896265920,
+        "timestamp": "2026-05-18T10:50:35.292667+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-2",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "140",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 2.57,
+      "error": "",
+      "request_number": 20,
+      "server_name": "web-2",
+      "hostname": "aa55c4ce0b1e",
+      "backend_header": "web-2"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-1",
+        "hostname": "542d59632bbd",
+        "process_id": 14,
+        "thread_id": 132567422465728,
+        "timestamp": "2026-05-18T10:50:35.295443+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-1",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "140",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 2.63,
+      "error": "",
+      "request_number": 21,
+      "server_name": "web-1",
+      "hostname": "542d59632bbd",
+      "backend_header": "web-1"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-2",
+        "hostname": "aa55c4ce0b1e",
+        "process_id": 11,
+        "thread_id": 136116896265920,
+        "timestamp": "2026-05-18T10:50:35.297769+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-2",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "140",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 2.07,
+      "error": "",
+      "request_number": 22,
+      "server_name": "web-2",
+      "hostname": "aa55c4ce0b1e",
+      "backend_header": "web-2"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-1",
+        "hostname": "542d59632bbd",
+        "process_id": 14,
+        "thread_id": 132567422465728,
+        "timestamp": "2026-05-18T10:50:35.300339+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-1",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "140",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 2.66,
+      "error": "",
+      "request_number": 23,
+      "server_name": "web-1",
+      "hostname": "542d59632bbd",
+      "backend_header": "web-1"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-2",
+        "hostname": "aa55c4ce0b1e",
+        "process_id": 8,
+        "thread_id": 136116896265920,
+        "timestamp": "2026-05-18T10:50:35.303463+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-2",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "139",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 3.02,
+      "error": "",
+      "request_number": 24,
+      "server_name": "web-2",
+      "hostname": "aa55c4ce0b1e",
+      "backend_header": "web-2"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-1",
+        "hostname": "542d59632bbd",
+        "process_id": 14,
+        "thread_id": 132567422465728,
+        "timestamp": "2026-05-18T10:50:35.305916+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-1",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "140",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 2.46,
+      "error": "",
+      "request_number": 25,
+      "server_name": "web-1",
+      "hostname": "542d59632bbd",
+      "backend_header": "web-1"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-2",
+        "hostname": "aa55c4ce0b1e",
+        "process_id": 11,
+        "thread_id": 136116896265920,
+        "timestamp": "2026-05-18T10:50:35.308486+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-2",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "140",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 2.19,
+      "error": "",
+      "request_number": 26,
+      "server_name": "web-2",
+      "hostname": "aa55c4ce0b1e",
+      "backend_header": "web-2"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-1",
+        "hostname": "542d59632bbd",
+        "process_id": 14,
+        "thread_id": 132567422465728,
+        "timestamp": "2026-05-18T10:50:35.310665+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-1",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "140",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 2.2,
+      "error": "",
+      "request_number": 27,
+      "server_name": "web-1",
+      "hostname": "542d59632bbd",
+      "backend_header": "web-1"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-2",
+        "hostname": "aa55c4ce0b1e",
+        "process_id": 8,
+        "thread_id": 136116896265920,
+        "timestamp": "2026-05-18T10:50:35.312966+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-2",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "139",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 2.56,
+      "error": "",
+      "request_number": 28,
+      "server_name": "web-2",
+      "hostname": "aa55c4ce0b1e",
+      "backend_header": "web-2"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-1",
+        "hostname": "542d59632bbd",
+        "process_id": 14,
+        "thread_id": 132567422465728,
+        "timestamp": "2026-05-18T10:50:35.315920+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-1",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "140",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 2.53,
+      "error": "",
+      "request_number": 29,
+      "server_name": "web-1",
+      "hostname": "542d59632bbd",
+      "backend_header": "web-1"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-2",
+        "hostname": "aa55c4ce0b1e",
+        "process_id": 11,
+        "thread_id": 136116896265920,
+        "timestamp": "2026-05-18T10:50:35.318228+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-2",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "140",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 2.17,
+      "error": "",
+      "request_number": 30,
+      "server_name": "web-2",
+      "hostname": "aa55c4ce0b1e",
+      "backend_header": "web-2"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-1",
+        "hostname": "542d59632bbd",
+        "process_id": 14,
+        "thread_id": 132567422465728,
+        "timestamp": "2026-05-18T10:50:35.321143+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-1",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "140",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 3.05,
+      "error": "",
+      "request_number": 31,
+      "server_name": "web-1",
+      "hostname": "542d59632bbd",
+      "backend_header": "web-1"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-2",
+        "hostname": "aa55c4ce0b1e",
+        "process_id": 11,
+        "thread_id": 136116896265920,
+        "timestamp": "2026-05-18T10:50:35.323469+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-2",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "140",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 2.02,
+      "error": "",
+      "request_number": 32,
+      "server_name": "web-2",
+      "hostname": "aa55c4ce0b1e",
+      "backend_header": "web-2"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-1",
+        "hostname": "542d59632bbd",
+        "process_id": 14,
+        "thread_id": 132567422465728,
+        "timestamp": "2026-05-18T10:50:35.325466+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-1",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "140",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 1.91,
+      "error": "",
+      "request_number": 33,
+      "server_name": "web-1",
+      "hostname": "542d59632bbd",
+      "backend_header": "web-1"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-2",
+        "hostname": "aa55c4ce0b1e",
+        "process_id": 8,
+        "thread_id": 136116896265920,
+        "timestamp": "2026-05-18T10:50:35.328036+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-2",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "139",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 2.78,
+      "error": "",
+      "request_number": 34,
+      "server_name": "web-2",
+      "hostname": "aa55c4ce0b1e",
+      "backend_header": "web-2"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-1",
+        "hostname": "542d59632bbd",
+        "process_id": 15,
+        "thread_id": 132567422465728,
+        "timestamp": "2026-05-18T10:50:35.330824+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-1",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "140",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 2.52,
+      "error": "",
+      "request_number": 35,
+      "server_name": "web-1",
+      "hostname": "542d59632bbd",
+      "backend_header": "web-1"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-2",
+        "hostname": "aa55c4ce0b1e",
+        "process_id": 11,
+        "thread_id": 136116896265920,
+        "timestamp": "2026-05-18T10:50:35.332931+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-2",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "140",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 1.94,
+      "error": "",
+      "request_number": 36,
+      "server_name": "web-2",
+      "hostname": "aa55c4ce0b1e",
+      "backend_header": "web-2"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-1",
+        "hostname": "542d59632bbd",
+        "process_id": 15,
+        "thread_id": 132567422465728,
+        "timestamp": "2026-05-18T10:50:35.335732+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-1",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "140",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 3.1,
+      "error": "",
+      "request_number": 37,
+      "server_name": "web-1",
+      "hostname": "542d59632bbd",
+      "backend_header": "web-1"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-2",
+        "hostname": "aa55c4ce0b1e",
+        "process_id": 8,
+        "thread_id": 136116896265920,
+        "timestamp": "2026-05-18T10:50:35.338394+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-2",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "139",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 2.29,
+      "error": "",
+      "request_number": 38,
+      "server_name": "web-2",
+      "hostname": "aa55c4ce0b1e",
+      "backend_header": "web-2"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-1",
+        "hostname": "542d59632bbd",
+        "process_id": 14,
+        "thread_id": 132567422465728,
+        "timestamp": "2026-05-18T10:50:35.340428+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-1",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "140",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 2.48,
+      "error": "",
+      "request_number": 39,
+      "server_name": "web-1",
+      "hostname": "542d59632bbd",
+      "backend_header": "web-1"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-2",
+        "hostname": "aa55c4ce0b1e",
+        "process_id": 11,
+        "thread_id": 136116896265920,
+        "timestamp": "2026-05-18T10:50:35.343814+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-2",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "140",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 2.82,
+      "error": "",
+      "request_number": 40,
+      "server_name": "web-2",
+      "hostname": "aa55c4ce0b1e",
+      "backend_header": "web-2"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-1",
+        "hostname": "542d59632bbd",
+        "process_id": 14,
+        "thread_id": 132567422465728,
+        "timestamp": "2026-05-18T10:50:35.345977+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-1",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "140",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 2.03,
+      "error": "",
+      "request_number": 41,
+      "server_name": "web-1",
+      "hostname": "542d59632bbd",
+      "backend_header": "web-1"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-2",
+        "hostname": "aa55c4ce0b1e",
+        "process_id": 11,
+        "thread_id": 136116896265920,
+        "timestamp": "2026-05-18T10:50:35.348697+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-2",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "140",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 3.0,
+      "error": "",
+      "request_number": 42,
+      "server_name": "web-2",
+      "hostname": "aa55c4ce0b1e",
+      "backend_header": "web-2"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-1",
+        "hostname": "542d59632bbd",
+        "process_id": 14,
+        "thread_id": 132567422465728,
+        "timestamp": "2026-05-18T10:50:35.351313+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-1",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "140",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 2.18,
+      "error": "",
+      "request_number": 43,
+      "server_name": "web-1",
+      "hostname": "542d59632bbd",
+      "backend_header": "web-1"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-2",
+        "hostname": "aa55c4ce0b1e",
+        "process_id": 11,
+        "thread_id": 136116896265920,
+        "timestamp": "2026-05-18T10:50:35.353324+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-2",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "140",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 1.96,
+      "error": "",
+      "request_number": 44,
+      "server_name": "web-2",
+      "hostname": "aa55c4ce0b1e",
+      "backend_header": "web-2"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-1",
+        "hostname": "542d59632bbd",
+        "process_id": 15,
+        "thread_id": 132567422465728,
+        "timestamp": "2026-05-18T10:50:35.356004+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-1",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "140",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 2.88,
+      "error": "",
+      "request_number": 45,
+      "server_name": "web-1",
+      "hostname": "542d59632bbd",
+      "backend_header": "web-1"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-2",
+        "hostname": "aa55c4ce0b1e",
+        "process_id": 8,
+        "thread_id": 136116896265920,
+        "timestamp": "2026-05-18T10:50:35.358542+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-2",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "139",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 2.36,
+      "error": "",
+      "request_number": 46,
+      "server_name": "web-2",
+      "hostname": "aa55c4ce0b1e",
+      "backend_header": "web-2"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-1",
+        "hostname": "542d59632bbd",
+        "process_id": 14,
+        "thread_id": 132567422465728,
+        "timestamp": "2026-05-18T10:50:35.361013+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-1",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "140",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 2.3,
+      "error": "",
+      "request_number": 47,
+      "server_name": "web-1",
+      "hostname": "542d59632bbd",
+      "backend_header": "web-1"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-2",
+        "hostname": "aa55c4ce0b1e",
+        "process_id": 11,
+        "thread_id": 136116896265920,
+        "timestamp": "2026-05-18T10:50:35.363838+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-2",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "140",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 2.9,
+      "error": "",
+      "request_number": 48,
+      "server_name": "web-2",
+      "hostname": "aa55c4ce0b1e",
+      "backend_header": "web-2"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-1",
+        "hostname": "542d59632bbd",
+        "process_id": 14,
+        "thread_id": 132567422465728,
+        "timestamp": "2026-05-18T10:50:35.366290+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-1",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "140",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 2.16,
+      "error": "",
+      "request_number": 49,
+      "server_name": "web-1",
+      "hostname": "542d59632bbd",
+      "backend_header": "web-1"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-2",
+        "hostname": "aa55c4ce0b1e",
+        "process_id": 11,
+        "thread_id": 136116896265920,
+        "timestamp": "2026-05-18T10:50:35.368531+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-2",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "140",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 3.15,
+      "error": "",
+      "request_number": 50,
+      "server_name": "web-2",
+      "hostname": "aa55c4ce0b1e",
+      "backend_header": "web-2"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-1",
+        "hostname": "542d59632bbd",
+        "process_id": 14,
+        "thread_id": 132567422465728,
+        "timestamp": "2026-05-18T10:50:35.372285+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-1",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "140",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 2.67,
+      "error": "",
+      "request_number": 51,
+      "server_name": "web-1",
+      "hostname": "542d59632bbd",
+      "backend_header": "web-1"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-2",
+        "hostname": "aa55c4ce0b1e",
+        "process_id": 11,
+        "thread_id": 136116896265920,
+        "timestamp": "2026-05-18T10:50:35.374994+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-2",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "140",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 3.42,
+      "error": "",
+      "request_number": 52,
+      "server_name": "web-2",
+      "hostname": "aa55c4ce0b1e",
+      "backend_header": "web-2"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-1",
+        "hostname": "542d59632bbd",
+        "process_id": 14,
+        "thread_id": 132567422465728,
+        "timestamp": "2026-05-18T10:50:35.379068+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-1",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "140",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 3.26,
+      "error": "",
+      "request_number": 53,
+      "server_name": "web-1",
+      "hostname": "542d59632bbd",
+      "backend_header": "web-1"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-2",
+        "hostname": "aa55c4ce0b1e",
+        "process_id": 11,
+        "thread_id": 136116896265920,
+        "timestamp": "2026-05-18T10:50:35.381452+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-2",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "140",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 2.23,
+      "error": "",
+      "request_number": 54,
+      "server_name": "web-2",
+      "hostname": "aa55c4ce0b1e",
+      "backend_header": "web-2"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-1",
+        "hostname": "542d59632bbd",
+        "process_id": 14,
+        "thread_id": 132567422465728,
+        "timestamp": "2026-05-18T10:50:35.384908+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-1",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "140",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 3.78,
+      "error": "",
+      "request_number": 55,
+      "server_name": "web-1",
+      "hostname": "542d59632bbd",
+      "backend_header": "web-1"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-2",
+        "hostname": "aa55c4ce0b1e",
+        "process_id": 11,
+        "thread_id": 136116896265920,
+        "timestamp": "2026-05-18T10:50:35.387840+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-2",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "140",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 2.44,
+      "error": "",
+      "request_number": 56,
+      "server_name": "web-2",
+      "hostname": "aa55c4ce0b1e",
+      "backend_header": "web-2"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-1",
+        "hostname": "542d59632bbd",
+        "process_id": 15,
+        "thread_id": 132567422465728,
+        "timestamp": "2026-05-18T10:50:35.392783+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-1",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "140",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 4.91,
+      "error": "",
+      "request_number": 57,
+      "server_name": "web-1",
+      "hostname": "542d59632bbd",
+      "backend_header": "web-1"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-2",
+        "hostname": "aa55c4ce0b1e",
+        "process_id": 11,
+        "thread_id": 136116896265920,
+        "timestamp": "2026-05-18T10:50:35.395594+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-2",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "140",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 3.66,
+      "error": "",
+      "request_number": 58,
+      "server_name": "web-2",
+      "hostname": "aa55c4ce0b1e",
+      "backend_header": "web-2"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-1",
+        "hostname": "542d59632bbd",
+        "process_id": 14,
+        "thread_id": 132567422465728,
+        "timestamp": "2026-05-18T10:50:35.399504+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-1",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "140",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 2.8,
+      "error": "",
+      "request_number": 59,
+      "server_name": "web-1",
+      "hostname": "542d59632bbd",
+      "backend_header": "web-1"
+    },
+    {
+      "status_code": 200,
+      "response": {
+        "server_name": "web-2",
+        "hostname": "aa55c4ce0b1e",
+        "process_id": 11,
+        "thread_id": 136116896265920,
+        "timestamp": "2026-05-18T10:50:35.402042+00:00"
+      },
+      "headers": {
+        "server": "gunicorn",
+        "date": "Mon, 18 May 2026 10:50:35 GMT",
+        "content-type": "application/json",
+        "x-backend-server": "web-2",
+        "vary": "Accept, origin",
+        "allow": "GET, HEAD, OPTIONS",
+        "x-frame-options": "DENY",
+        "content-length": "140",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "same-origin",
+        "cross-origin-opener-policy": "same-origin",
+        "connection": "close"
+      },
+      "duration_ms": 2.43,
+      "error": "",
+      "request_number": 60,
+      "server_name": "web-2",
+      "hostname": "aa55c4ce0b1e",
+      "backend_header": "web-2"
+    }
+  ],
+  "created_at": "2026-05-18T10:50:35"
+}

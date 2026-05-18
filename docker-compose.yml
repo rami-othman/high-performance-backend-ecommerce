@@ -1,25 +1,57 @@
+x-web-common: &web-common
+  build: .
+  env_file:
+    - .env
+  environment: &web-environment
+    ALLOWED_HOSTS: localhost,127.0.0.1,0.0.0.0,web,web2,web3,load_balancer
+    POSTGRES_HOST: db
+    REDIS_URL: redis://redis:6379/0
+    CELERY_BROKER_URL: redis://redis:6379/0
+    CELERY_RESULT_BACKEND: redis://redis:6379/0
+    WEB_CONCURRENCY: ${WEB_CONCURRENCY:-8}
+    GUNICORN_THREADS: ${GUNICORN_THREADS:-2}
+    GUNICORN_TIMEOUT: ${GUNICORN_TIMEOUT:-120}
+  expose:
+    - "8000"
+  depends_on:
+    - db
+    - redis
+  volumes:
+    - .:/app
+
 services:
-  web:
-    build: .
-    command: sh scripts/start_web.sh
-    env_file:
-      - .env
-    environment:
-      POSTGRES_HOST: db
-      REDIS_URL: redis://redis:6379/0
-      CELERY_BROKER_URL: redis://redis:6379/0
-      CELERY_RESULT_BACKEND: redis://redis:6379/0
-      SERVER_NAME: web-1
-      WEB_CONCURRENCY: ${WEB_CONCURRENCY:-8}
-      GUNICORN_THREADS: ${GUNICORN_THREADS:-2}
-      GUNICORN_TIMEOUT: ${GUNICORN_TIMEOUT:-120}
+  load_balancer:
+    image: haproxy:3.0-alpine
     ports:
-      - "8000:8000"
-    depends_on:
-      - db
-      - redis
+      - "8000:80"
+      - "8404:8404"
     volumes:
-      - .:/app
+      - ./infra/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    depends_on:
+      - web
+      - web2
+      - web3
+
+  web:
+    <<: *web-common
+    command: sh scripts/start_web.sh
+    environment:
+      <<: *web-environment
+      SERVER_NAME: web-1
+
+  web2:
+    <<: *web-common
+    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000 --worker-class gthread --workers ${WEB_CONCURRENCY:-8} --threads ${GUNICORN_THREADS:-2} --timeout ${GUNICORN_TIMEOUT:-120}
+    environment:
+      <<: *web-environment
+      SERVER_NAME: web-2
+
+  web3:
+    <<: *web-common
+    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000 --worker-class gthread --workers ${WEB_CONCURRENCY:-8} --threads ${GUNICORN_THREADS:-2} --timeout ${GUNICORN_TIMEOUT:-120}
+    environment:
+      <<: *web-environment
+      SERVER_NAME: web-3
 
   celery:
     build: .

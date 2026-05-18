@@ -29,7 +29,7 @@ This is a monolithic Django project with separate domain apps. It is not a micro
 - `cart`: one cart per user and cart items
 - `orders`: checkout, orders, order items, transaction boundary
 - `payments`: payment records created during checkout
-- `reports`: daily sales report model and batch task placeholder
+- `reports`: daily sales report model and batch processing task
 - `performance`: request duration logging and health/server info endpoints
 
 ## JWT Authentication
@@ -67,6 +67,7 @@ The response includes `user`, `access`, and `refresh`. API POST requests should 
 - `orders_orderbackgroundtask`: persistent Celery task status proof for order background work
 - `payments_payment`: one payment per order
 - `reports_dailysalesreport`: daily aggregate sales results
+- `reports_dailysalesbatchrun`: persistent chunked batch processing proof rows
 - `performance_performancelog`: API/UI request timing logs
 - Django default auth/session/admin tables
 
@@ -88,6 +89,7 @@ The response includes `user`, `access`, and `refresh`. API POST requests should 
 | GET | `/api/orders/` | List current user's orders |
 | GET | `/api/orders/{id}/` | Current user's order detail |
 | POST | `/api/reports/daily-sales/run/` | Dispatch daily sales report task |
+| GET | `/api/reports/daily-sales/batch-runs/{id}/` | Inspect one daily sales batch run |
 | GET | `/api/reports/daily-sales/` | List daily sales reports |
 | GET | `/api/performance/logs/` | List recent performance logs |
 | GET | `/api/performance/capacity/` | Admin checkout capacity metrics |
@@ -344,6 +346,119 @@ Expected default result:
 
 The script saves proof output in `results/async_queues/async_queue_task3_latest.json` and a timestamped JSON file.
 
+## Task 4 - Batch Processing
+
+Task 4 proves that daily sales reporting runs as a background batch job and processes orders in controlled chunks instead of loading the whole day into memory.
+
+Chosen approach:
+
+- Celery worker with Redis as the broker
+- Keyset pagination by `Order.id`
+- Configurable chunk size
+- `DailySalesBatchRun` rows for technical proof
+- `DailySalesReport` rows for final business totals
+
+Key files:
+
+- `reports/tasks.py`: chunked daily sales Celery task
+- `reports/models.py`: `DailySalesReport` and `DailySalesBatchRun`
+- `reports/views.py`: authenticated API trigger endpoint
+- `scripts/batch_processing_test.py`: HTTP and database proof script
+- `docs/TASK_4_BATCH_PROCESSING.md`: report-ready Task 4 explanation
+
+The batch job fetches only a page of order IDs at a time:
+
+```text
+Order.objects
+  .filter(created_at__date=report_date, id__gt=last_id)
+  .order_by("id")[:chunk_size]
+```
+
+Each chunk is aggregated separately. The task records chunk counts, quantities, sales totals, and duration in `DailySalesBatchRun.metadata["chunks"]`, then merges partial totals into one `DailySalesReport`.
+
+Docker:
+
+```bash
+docker compose up --build
+docker compose exec web python scripts/batch_processing_test.py
+```
+
+Local:
+
+```bash
+python manage.py runserver
+celery -A config worker --loglevel=info
+python scripts/batch_processing_test.py
+```
+
+Expected default result:
+
+- API trigger status: `202`
+- Generated orders: `250`
+- Chunk size: `50`
+- Expected chunks: `5`
+- Actual chunks processed: `5`
+- Batch status: `success`
+- Report totals correct
+- Result: `PASSED`
+
+The script saves proof output in `results/batch_processing/batch_processing_task4_latest.json` and a timestamped JSON file.
+
+## Task 5 - Load Distribution
+
+Task 5 simulates horizontal request distribution while keeping the project as one monolithic Django application.
+
+Chosen approach:
+
+- HAProxy as the public HTTP load balancer
+- Three identical Django backend containers: `web`, `web2`, and `web3`
+- Round Robin load balancing
+- Shared PostgreSQL database
+- Shared Redis for capacity control, cache, Celery broker, and result backend
+- Lightweight `/api/health/` checks for HAProxy
+- `/api/server-info/` proof endpoint showing which backend handled a request
+
+Round Robin is appropriate here because all three Django containers run the same image, use the same resources in this simulation, and handle similar short API requests. The app is stateless enough for this setup because JWT authentication is not stored in one web container, and durable/shared state lives in PostgreSQL and Redis.
+
+The public API entrypoint is now:
+
+```text
+http://localhost:8000
+```
+
+That host port points to HAProxy, not directly to one Django container.
+
+Docker:
+
+```bash
+docker compose up --build
+docker compose exec web python scripts/load_distribution_test.py
+```
+
+From the host:
+
+```bash
+python scripts/load_distribution_test.py
+```
+
+Expected default result:
+
+- Total requests: `60`
+- Successful responses: `60`
+- Failed responses: `0`
+- Backend servers reached: `web-1`, `web-2`, `web-3`
+- Unique backend servers reached: `3`
+- Distribution reasonably balanced
+- Result: `PASSED`
+
+HAProxy stats are available at:
+
+```text
+http://localhost:8404/stats
+```
+
+The script saves proof output in `results/load_distribution/load_distribution_task5_latest.json` and a timestamped JSON file.
+
 ## Run With Docker
 
 Create `.env` first:
@@ -393,16 +508,23 @@ http://127.0.0.1:8000/api/docs/
 - Persistent `OrderBackgroundTask` lifecycle rows for queued/started/success/failure task proof
 - Task 3 asynchronous queue proof script
 - Task 3 documentation for asynchronous queues
+- Task 4 Celery daily sales batch processing with keyset chunking
+- Persistent `DailySalesBatchRun` rows proving chunk size, chunk count, totals, and duration
+- Task 4 batch processing proof script
+- Task 4 documentation for chunked daily sales processing
+- HAProxy load balancer with Round Robin distribution across `web`, `web2`, and `web3`
+- Task 5 load distribution proof script
+- Task 5 documentation for horizontal request distribution
 - Main project documentation in `docs/PROJECT_DOCUMENTATION.md`
 - Payment creation during checkout
 - Cart clearing after checkout
-- Placeholder Celery task for daily sales reports
+- Daily sales report generation with merged chunk totals
 - Basic automated checkout API test
 - Redis configured as Celery broker, result backend, and Django cache backend
 - Request duration middleware with database logging
 - Health and server-info endpoints
 - Swagger/OpenAPI docs
-- Docker Compose with web, PostgreSQL, Redis, and Celery
+- Docker Compose with HAProxy, three Django web containers, PostgreSQL, Redis, and Celery
 - Simple Django template pages
 - Simple e-commerce UI that consumes the API with JWT and token refresh
 - Seed data script
@@ -410,13 +532,10 @@ http://127.0.0.1:8000/api/docs/
 
 ## TODO
 
-- Implement Task 4 batch processing
 - Expand automated tests for API behavior
-- Add Redis caching to product list/detail endpoints
-- Add batch report chunking for large order tables
+- Implement Task 6 distributed Redis caching for product list/detail endpoints
 - Add k6 stress tests
 - Add benchmarking scripts and result documentation
-- Add Nginx for load distribution across multiple Django containers
 - Add database indexes after observing query patterns
 - Add stricter production settings
 
@@ -425,14 +544,12 @@ http://127.0.0.1:8000/api/docs/
 - Race Condition Protection: checkout locks the user's cart row inside `transaction.atomic()` before reading cart items, then locks product rows with `select_for_update()` in deterministic `id` order. Order invoice and notification Celery tasks are dispatched with `transaction.on_commit()` so workers only see committed orders. This prepares the project for checkout race-condition testing.
 - Resource Management: checkout uses a Redis-backed active request counter to cap concurrent checkout operations, DRF scoped throttling for API protection, and Gunicorn `gthread` workers so the web runtime can handle enough parallel requests for the limiter proof.
 - Queues: Celery uses Redis to run invoice generation and order notification work outside the checkout request path. `OrderBackgroundTask` records prove queued, started, success, and failure states.
-- Batch Processing: Task 4 is next. The daily sales report task is ready to evolve into chunk-based processing.
-- Load Distribution: `/api/server-info/` returns `SERVER_NAME`; later Nginx can route across multiple `web` replicas.
-- Redis Cache: settings include Redis cache; later product and report endpoints can cache expensive reads.
+- Batch Processing: Celery runs daily sales reports in chunks using keyset pagination by `Order.id`. `DailySalesBatchRun` records prove expected chunk count, actual chunks processed, and merged totals.
+- Load Distribution: HAProxy distributes requests with Round Robin across `web-1`, `web-2`, and `web-3`. `/api/server-info/` proves which backend handled each request, and `/api/health/` supports HTTP health checks.
+- Redis Cache: Task 6 is next. Settings include Redis cache; later product and report endpoints can cache expensive reads.
 - Stress Testing: k6 will later simulate concurrent browse, cart, and checkout scenarios.
 - Benchmarking: performance logs capture endpoint duration; later benchmark scripts can compare baseline vs optimized versions.
 
-## Later Nginx Load Distribution
+## Next Distributed Caching Step
 
-Nginx should be added after the base backend is stable. The intended setup is multiple Django `web` containers behind one Nginx reverse proxy. Each `web` container will use a different `SERVER_NAME`, and `/api/server-info/` will confirm request distribution.
-
-This step is intentionally not implemented yet to keep the first project phase focused on a correct monolithic backend foundation.
+Task 6 should add Redis-backed caching to selected read-heavy endpoints and prove the difference between uncached and cached responses without changing the monolithic architecture.

@@ -4,6 +4,8 @@ from django.db import DatabaseError
 
 
 class PerformanceLogMiddleware:
+    SKIP_PATHS = {"/api/health/", "/api/server-info/"}
+
     def __init__(self, get_response):
         self.get_response = get_response
 
@@ -11,6 +13,9 @@ class PerformanceLogMiddleware:
         start = time.perf_counter()
         response = self.get_response(request)
         duration_ms = (time.perf_counter() - start) * 1000
+
+        if request.path in self.SKIP_PATHS:
+            return response
 
         try:
             from .models import PerformanceLog

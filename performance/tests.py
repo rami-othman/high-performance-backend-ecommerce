@@ -1,4 +1,7 @@
-from django.test import SimpleTestCase
+from django.test import SimpleTestCase, TestCase, override_settings
+from django.urls import reverse
+
+from .models import PerformanceLog
 
 
 class FakeRedis:
@@ -97,3 +100,33 @@ class ResourceCapacityScriptTests(SimpleTestCase):
 
         self.assertFalse(summary["passed"])
         self.assertFalse(summary["overlap_observed"])
+
+
+class SystemEndpointTests(TestCase):
+    @override_settings(SERVER_NAME="unit-test-server")
+    def test_health_endpoint_returns_status_and_server_identity(self):
+        initial_log_count = PerformanceLog.objects.count()
+
+        response = self.client.get(reverse("health"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["status"], "ok")
+        self.assertEqual(response.json()["server_name"], "unit-test-server")
+        self.assertIn("hostname", response.json())
+        self.assertIn("timestamp", response.json())
+        self.assertEqual(PerformanceLog.objects.count(), initial_log_count)
+
+    @override_settings(SERVER_NAME="unit-test-server")
+    def test_server_info_endpoint_returns_server_identity_and_header(self):
+        initial_log_count = PerformanceLog.objects.count()
+
+        response = self.client.get(reverse("server-info"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["server_name"], "unit-test-server")
+        self.assertEqual(response.headers["X-Backend-Server"], "unit-test-server")
+        self.assertIn("hostname", response.json())
+        self.assertIn("process_id", response.json())
+        self.assertIn("thread_id", response.json())
+        self.assertIn("timestamp", response.json())
+        self.assertEqual(PerformanceLog.objects.count(), initial_log_count)

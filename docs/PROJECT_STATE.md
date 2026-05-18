@@ -31,8 +31,9 @@ The architecture is a monolithic Django project with separate domain apps. It is
 - `cart`: user carts and cart items
 - `orders`: transactional checkout and order records
 - `payments`: payment record created by checkout
-- `reports`: daily sales report model and Celery task placeholder
+- `reports`: daily sales report model and chunked Celery batch task
 - `performance`: request timing middleware, logs, health, and server-info
+- `load_balancer`: HAProxy service that distributes requests across three Django web containers
 
 JWT authentication is configured with SimpleJWT. API requests use `Authorization: Bearer <access_token>`. Basic authentication is still available for simple manual testing.
 
@@ -87,11 +88,13 @@ high_performance_ecommerce/
 |   `-- models.py
 |-- reports/
 |   |-- migrations/0001_initial.py
+|   |-- migrations/0002_dailysalesreport_total_order_items_and_more.py
 |   |-- __init__.py
 |   |-- admin.py
 |   |-- apps.py
 |   |-- models.py
 |   |-- serializers.py
+|   |-- tests.py
 |   |-- tasks.py
 |   |-- urls.py
 |   `-- views.py
@@ -127,13 +130,26 @@ high_performance_ecommerce/
 |   |-- PROJECT_DOCUMENTATION.md
 |   |-- PROJECT_STATE.md
 |   |-- TASK_1_CONCURRENT_ACCESS.md
-|   `-- TASK_3_ASYNC_QUEUES.md
+|   |-- TASK_3_ASYNC_QUEUES.md
+|   |-- TASK_4_BATCH_PROCESSING.md
+|   `-- TASK_5_LOAD_DISTRIBUTION.md
+|-- infra/
+|   `-- haproxy/
+|       `-- haproxy.cfg
 |-- scripts/
 |   |-- async_queue_test.py
+|   |-- batch_processing_test.py
+|   |-- load_distribution_test.py
 |   |-- race_condition_test.py
 |   |-- resource_capacity_test.py
 |   |-- start_web.sh
 |   `-- seed_data.py
+|-- results/
+|   |-- async_queues/
+|   |-- batch_processing/
+|   |-- load_distribution/
+|   |-- race_condition/
+|   `-- resource_capacity/
 |-- manage.py
 |-- requirements.txt
 |-- .env.example
@@ -221,9 +237,32 @@ high_performance_ecommerce/
 
 - `date`
 - `total_orders`
+- `total_order_items`
+- `total_quantity_sold`
 - `total_sales`
 - `best_selling_product`
 - `created_at`
+- `updated_at`
+
+### reports.DailySalesBatchRun
+
+- `report_date`
+- `report`
+- `celery_task_id`
+- `status`
+- `chunk_size`
+- `chunks_processed`
+- `total_orders`
+- `total_order_items`
+- `total_quantity_sold`
+- `total_sales`
+- `started_at`
+- `finished_at`
+- `duration_ms`
+- `metadata`
+- `error_message`
+- `created_at`
+- `updated_at`
 
 ### performance.PerformanceLog
 
@@ -263,6 +302,7 @@ high_performance_ecommerce/
 ### Reports API
 
 - `POST /api/reports/daily-sales/run/`
+- `GET /api/reports/daily-sales/batch-runs/{id}/`
 - `GET /api/reports/daily-sales/`
 
 ### Performance/System API
@@ -461,6 +501,100 @@ Task 3 documentation is:
 docs/TASK_3_ASYNC_QUEUES.md
 ```
 
+## Task 4 - Batch Processing
+
+Task 4 is now implemented and provable.
+
+The chosen solution is Celery-backed chunked daily sales processing:
+
+- `reports/models.py` has `DailySalesBatchRun` for persistent chunk proof.
+- `reports/tasks.py` has `process_daily_sales_report_task`, a bound Celery task.
+- The task uses keyset pagination by `Order.id`.
+- Each loop processes at most `chunk_size` orders.
+- Chunk totals are stored in `DailySalesBatchRun.metadata["chunks"]`.
+- Final merged totals are written to `DailySalesReport`.
+- `reports/views.py` queues the job through `POST /api/reports/daily-sales/run/`.
+- `scripts/batch_processing_test.py` proves chunk count and totals.
+
+Task 4 environment settings:
+
+```text
+DAILY_SALES_BATCH_CHUNK_SIZE=100
+DAILY_SALES_BATCH_TEST_ORDER_COUNT=250
+DAILY_SALES_BATCH_TEST_CHUNK_SIZE=50
+```
+
+Default proof scenario:
+
+- Generated test orders: `250`
+- Chunk size: `50`
+- Expected chunks: `5`
+- Expected batch status: `success`
+- Expected result: `PASSED`
+
+Task 4 result files are written to:
+
+```text
+results/batch_processing/batch_processing_task4_latest.json
+results/batch_processing/batch_processing_task4_YYYYMMDD_HHMMSS.json
+```
+
+Task 4 documentation is:
+
+```text
+docs/TASK_4_BATCH_PROCESSING.md
+```
+
+## Task 5 - Load Distribution
+
+Task 5 is now implemented and provable.
+
+The chosen solution is HAProxy with Round Robin:
+
+- `docker-compose.yml` defines `load_balancer`, `web`, `web2`, `web3`, `db`, `redis`, and `celery`.
+- HAProxy listens on host port `8000` and forwards to the three internal Django web containers.
+- HAProxy stats are exposed on `http://localhost:8404/stats`.
+- `web` uses `SERVER_NAME=web-1`.
+- `web2` uses `SERVER_NAME=web-2`.
+- `web3` uses `SERVER_NAME=web-3`.
+- All web containers share the same PostgreSQL database.
+- All web containers share the same Redis service.
+- `/api/health/` is the lightweight HAProxy health check endpoint.
+- `/api/server-info/` returns the backend identity, hostname, process ID, thread ID, timestamp, and `X-Backend-Server` header.
+- `scripts/load_distribution_test.py` proves traffic reaches all three backend containers.
+
+Round Robin was selected because the containers are homogeneous and run similar API workloads. Sticky sessions are unnecessary because JWT authentication travels with each request and state is stored in shared PostgreSQL/Redis.
+
+Task 5 environment settings:
+
+```text
+SERVER_NAME=web-1
+LOAD_BALANCER_TEST_REQUESTS=60
+LOAD_BALANCER_TEST_BASE_URL=http://load_balancer
+```
+
+Default proof scenario:
+
+- Total requests: `60`
+- Expected successful responses: `60`
+- Expected failed responses: `0`
+- Expected backend servers reached: `web-1`, `web-2`, `web-3`
+- Expected unique backend servers reached: `3`
+- Expected result: `PASSED`
+
+Task 5 result files are written to:
+
+```text
+results/load_distribution/load_distribution_task5_latest.json
+results/load_distribution/load_distribution_task5_YYYYMMDD_HHMMSS.json
+```
+
+Task 5 documentation is:
+
+```text
+docs/TASK_5_LOAD_DISTRIBUTION.md
+```
+
 ## Next Tasks
 
 1. Install dependencies in a Conda environment.
@@ -471,12 +605,10 @@ docs/TASK_3_ASYNC_QUEUES.md
 6. Seed sample products.
 7. Test Swagger endpoints manually.
 8. Test the full UI flow from `/ui/register/` to checkout.
-9. Implement Task 4: Batch Processing.
+9. Implement Task 6: Distributed Caching.
 10. Expand automated API tests.
-11. Add Redis caching to product endpoints.
-12. Add Nginx and multiple web replicas for load balancing.
-13. Add k6 stress testing.
-14. Add benchmarking scripts and write benchmark reports.
+11. Add k6 stress testing.
+12. Add benchmarking scripts and write benchmark reports.
 
 ## Known Decisions
 
@@ -487,11 +619,11 @@ docs/TASK_3_ASYNC_QUEUES.md
 - Use Celery for async jobs.
 - Use SimpleJWT for API authentication.
 - Use k6 later for stress testing.
-- Use Nginx later for load balancing.
+- Use HAProxy for load balancing.
 - Do not add a custom user model.
 - Do not create microservices.
 - Keep the first phase focused on the base foundation, not full optimization.
 
 ## Important Notes
 
-The project is intentionally simple at this stage. Task 1 is implemented with the checkout transaction, cart lock, deterministic product locking, a race-condition proof script, and report-ready documentation. Task 2 is implemented with a Redis-backed checkout capacity limiter, scoped DRF throttling, capacity metrics, a resource capacity proof script, and main project documentation. Task 3 is implemented with Celery invoice/notification tasks, persistent `OrderBackgroundTask` logs, `transaction.on_commit()` dispatch, and an async queue proof script. The next non-functional requirement is Task 4 - Batch Processing. Performance logging is basic and database-backed so benchmarking can start early, but it may later need buffering or sampling to reduce overhead under heavy load.
+The project is intentionally simple at this stage. Task 1 is implemented with the checkout transaction, cart lock, deterministic product locking, a race-condition proof script, and report-ready documentation. Task 2 is implemented with a Redis-backed checkout capacity limiter, scoped DRF throttling, capacity metrics, a resource capacity proof script, and main project documentation. Task 3 is implemented with Celery invoice/notification tasks, persistent `OrderBackgroundTask` logs, `transaction.on_commit()` dispatch, and an async queue proof script. Task 4 is implemented with Celery daily sales batch processing, keyset chunking by order ID, `DailySalesBatchRun` proof rows, and a batch-processing proof script. Task 5 is implemented with HAProxy Round Robin load distribution across three Django web containers, shared PostgreSQL/Redis state, health checks, server identity proof endpoints, and a load-distribution proof script. The next non-functional requirement is Task 6 - Distributed Caching. Performance logging is basic and database-backed so benchmarking can start early, but it may later need buffering or sampling to reduce overhead under heavy load.

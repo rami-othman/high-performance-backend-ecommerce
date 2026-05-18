@@ -1,4 +1,5 @@
 import os
+import socket
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -11,9 +12,23 @@ load_dotenv(BASE_DIR / ".env")
 def env_bool(name, default):
     return os.getenv(name, str(default)).lower() in {"1", "true", "yes", "on"}
 
+
+def env_int(name, default, min_value=None, max_value=None):
+    try:
+        value = int(os.getenv(name, str(default)))
+    except (TypeError, ValueError):
+        value = default
+
+    if min_value is not None:
+        value = max(value, min_value)
+    if max_value is not None:
+        value = min(value, max_value)
+    return value
+
 SECRET_KEY = os.getenv("SECRET_KEY", "dev-only-change-me")
 DEBUG = os.getenv("DEBUG", "True").lower() == "true"
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,0.0.0.0").split(",")
+SERVER_NAME = os.getenv("SERVER_NAME", socket.gethostname())
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -136,6 +151,16 @@ CHECKOUT_CAPACITY_TTL_SECONDS = int(os.getenv("CHECKOUT_CAPACITY_TTL_SECONDS", "
 CHECKOUT_CAPACITY_TEST_DELAY_ENABLED = env_bool("CHECKOUT_CAPACITY_TEST_DELAY_ENABLED", DEBUG)
 ORDER_ASYNC_TASK_TEST_DELAY_ENABLED = env_bool("ORDER_ASYNC_TASK_TEST_DELAY_ENABLED", DEBUG)
 ORDER_ASYNC_TASK_TEST_DELAY_SECONDS = float(os.getenv("ORDER_ASYNC_TASK_TEST_DELAY_SECONDS", "1.0"))
+DAILY_SALES_BATCH_CHUNK_SIZE = env_int("DAILY_SALES_BATCH_CHUNK_SIZE", 100, min_value=1, max_value=1000)
+DAILY_SALES_BATCH_TEST_ORDER_COUNT = env_int("DAILY_SALES_BATCH_TEST_ORDER_COUNT", 250, min_value=1)
+DAILY_SALES_BATCH_TEST_CHUNK_SIZE = env_int(
+    "DAILY_SALES_BATCH_TEST_CHUNK_SIZE",
+    50,
+    min_value=1,
+    max_value=1000,
+)
+LOAD_BALANCER_TEST_REQUESTS = env_int("LOAD_BALANCER_TEST_REQUESTS", 60, min_value=1)
+LOAD_BALANCER_TEST_BASE_URL = os.getenv("LOAD_BALANCER_TEST_BASE_URL", "")
 
 CACHES = {
     "default": {

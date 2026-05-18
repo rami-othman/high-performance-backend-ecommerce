@@ -1,6 +1,8 @@
 import os
 import socket
+import threading
 
+from django.conf import settings
 from django.utils import timezone
 from rest_framework.permissions import AllowAny, IsAdminUser
 from rest_framework.response import Response
@@ -37,16 +39,30 @@ class HealthView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request):
-        return Response({"status": "ok", "timestamp": timezone.now().isoformat()})
+        response = Response(
+            {
+                "status": "ok",
+                "server_name": settings.SERVER_NAME,
+                "hostname": socket.gethostname(),
+                "timestamp": timezone.now().isoformat(),
+            }
+        )
+        response["X-Backend-Server"] = settings.SERVER_NAME
+        return response
 
 
 class ServerInfoView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request):
-        return Response(
+        response = Response(
             {
-                "server_name": os.getenv("SERVER_NAME", "local-dev"),
+                "server_name": settings.SERVER_NAME,
                 "hostname": socket.gethostname(),
+                "process_id": os.getpid(),
+                "thread_id": threading.get_ident(),
+                "timestamp": timezone.now().isoformat(),
             }
         )
+        response["X-Backend-Server"] = settings.SERVER_NAME
+        return response

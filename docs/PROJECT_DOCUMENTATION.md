@@ -15,8 +15,8 @@ The project is organized around these implementation tasks:
 | Task 1 | Concurrent Access & Data Integrity     | Implemented and provable        |
 | Task 2 | Resource Management & Capacity Control | Implemented and provable        |
 | Task 3 | Asynchronous Queues                    | Implemented and provable        |
-| Task 4 | Batch Processing                       | To be completed in later phases |
-| Task 5 | Load Distribution                      | To be completed in later phases |
+| Task 4 | Batch Processing                       | Implemented and provable        |
+| Task 5 | Load Distribution                      | Implemented and provable        |
 
 ## 3. Technology Stack
 
@@ -27,6 +27,7 @@ The project is organized around these implementation tasks:
 - PostgreSQL
 - Redis
 - Celery
+- HAProxy
 - Docker Compose
 - drf-spectacular Swagger/OpenAPI
 - Simple Django templates with Bootstrap and vanilla JavaScript
@@ -40,7 +41,7 @@ The system is intentionally monolithic. It uses separate Django apps for domain 
 - `cart`: user carts and cart items
 - `orders`: checkout, orders, order items, transaction boundary
 - `payments`: payment records created during checkout
-- `reports`: daily sales report model and Celery task placeholder
+- `reports`: daily sales report model, batch proof model, and chunked Celery task
 - `performance`: request timing logs, health endpoints, server info, and capacity metrics
 
 Redis is shared infrastructure for Celery, Django cache, DRF throttling, and the Task 2 checkout capacity limiter.
@@ -59,6 +60,7 @@ Core tables:
 | `orders_orderbackgroundtask` | Persistent Celery task lifecycle proof rows              |
 | `payments_payment`           | One payment record per order                             |
 | `reports_dailysalesreport`   | Daily aggregate sales data                               |
+| `reports_dailysalesbatchrun` | Technical proof for chunked daily sales batch jobs       |
 | `performance_performancelog` | Request duration logging                                 |
 
 The most important shared data item is `Product.stock`, because many users can try to buy the same product at the same time.
@@ -77,6 +79,8 @@ Main API endpoints:
 | POST   | `/api/cart/items/`           | Add item to cart                     |
 | POST   | `/api/orders/checkout/`      | Transactional checkout               |
 | GET    | `/api/orders/`               | Current user's orders                |
+| POST   | `/api/reports/daily-sales/run/` | Queue daily sales batch processing |
+| GET    | `/api/reports/daily-sales/`  | List daily sales reports             |
 | GET    | `/api/performance/capacity/` | Admin-only checkout capacity metrics |
 | GET    | `/api/docs/`                 | Swagger UI                           |
 
@@ -374,21 +378,248 @@ Conclusion: checkout commits the order and returns before the slower invoice and
 
 ## 12. Task 4 - Batch Processing
 
-To be completed in later phases.
+Task 4 processes daily sales data as a Celery background batch job.
 
-Planned focus: process large daily sales reports in chunks so long-running work does not overload memory or request workers.
+### Requirement
+
+Create a background job that performs daily sales processing and processes the data in chunks or batches to improve performance. The proof must show that a day with many orders is not loaded as one large in-memory operation.
+
+### Problem
+
+Processing large daily sales data in one request or one ORM load can be slow and memory-heavy. If the system loads all orders and all order items for a busy day at once, the request worker can block for a long time and memory usage grows with the size of the order table.
+
+### Chosen Solution
+
+The project uses a Celery background job with chunked processing:
+
+1. An admin client calls `POST /api/reports/daily-sales/run/`.
+2. Django validates `report_date` and `chunk_size`.
+3. Django creates a queued `DailySalesBatchRun`.
+4. The task is sent to Redis.
+5. A Celery worker processes orders in chunks.
+6. Chunk totals are merged into a final `DailySalesReport`.
+7. The batch run is marked `success` or `failure`.
+
+### Why Chunking Helps
+
+Chunking controls memory usage because each loop only selects a limited list of order IDs and aggregates order items for those IDs. It also makes progress measurable: `DailySalesBatchRun.chunks_processed` and `metadata["chunks"]` show exactly how many chunks were processed and how many orders were inside each chunk.
+
+The HTTP request only queues the work and returns `202 Accepted`. The expensive report generation happens in a Celery worker instead of blocking a Django request worker.
+
+### Algorithm
+
+The task uses keyset pagination by `Order.id`:
+
+```text
+last_id = 0
+
+while True:
+    order_ids = Order.objects
+        .filter(created_at__date=report_date, id__gt=last_id)
+        .order_by("id")
+        .values_list("id", flat=True)[:chunk_size]
+
+    if no order_ids:
+        break
+
+    process this chunk
+    last_id = last order id in the chunk
+```
+
+Keyset pagination avoids loading all orders at once and avoids the growing database cost of large offset pagination.
+
+### Data Flow
+
+```text
+API trigger
+ -> DailySalesBatchRun queued
+ -> Redis broker
+ -> Celery worker
+ -> chunk 1
+ -> chunk 2
+ -> ...
+ -> partial totals merged
+ -> DailySalesReport updated
+ -> DailySalesBatchRun marked success
+```
+
+### Correctness
+
+Each chunk calculates:
+
+- orders in the chunk
+- order items in the chunk
+- quantity sold in the chunk
+- sales total in the chunk
+- per-product sold quantity for best-seller selection
+
+The final report is not a separate unbounded load. It is built from the merged partial totals. The best-selling product is selected from accumulated per-product quantities across all chunks.
+
+### Proof
+
+The proof script is:
+
+```bash
+python scripts/batch_processing_test.py
+```
+
+Docker:
+
+```bash
+docker compose up --build
+docker compose exec web python scripts/batch_processing_test.py
+```
+
+Expected proof output:
+
+| Metric                  | Expected |
+| ----------------------- | -------- |
+| Generated test orders   | 250      |
+| Chunk size              | 50       |
+| Expected chunks         | 5        |
+| Actual chunks processed | 5        |
+| Batch status            | success  |
+| Result                  | PASSED   |
+
+The script writes JSON results to:
+
+```text
+results/batch_processing/batch_processing_task4_latest.json
+results/batch_processing/batch_processing_task4_YYYYMMDD_HHMMSS.json
+```
+
+### Key Files
+
+- `reports/models.py`
+- `reports/tasks.py`
+- `reports/views.py`
+- `reports/serializers.py`
+- `reports/urls.py`
+- `scripts/batch_processing_test.py`
+- `results/batch_processing/`
+
+### Connection To Earlier Tasks
+
+Task 3 proved that Celery and Redis can run asynchronous checkout background work. Task 4 uses the same queue infrastructure for a heavier daily sales job. Task 2 protects request capacity by limiting checkout concurrency; Task 4 protects background processing by avoiding one large memory-heavy report operation.
 
 ## 13. Task 5 - Load Distribution
 
-To be completed in later phases.
+Task 5 simulates distributing incoming HTTP requests across more than one backend server.
 
-Planned focus: run multiple Django web containers behind a load distributor and prove requests are distributed using `/api/server-info/`.
+### Requirement
+
+Simulate request distribution across multiple servers and explain the chosen distribution strategy.
+
+### Problem
+
+A single backend server can become a bottleneck under high traffic. Even if checkout is transactionally safe and async work is queued, one Django web container still has finite request capacity. The project needs to demonstrate that the request handling layer can be horizontally scaled while preserving shared state and correctness.
+
+### Chosen Solution
+
+The project uses three Django web containers behind HAProxy:
+
+- `web` with `SERVER_NAME=web-1`
+- `web2` with `SERVER_NAME=web-2`
+- `web3` with `SERVER_NAME=web-3`
+
+HAProxy is the single public entrypoint on `http://localhost:8000`. Each backend runs the same monolithic Django code and connects to the same PostgreSQL and Redis services.
+
+### Strategy
+
+HAProxy uses Round Robin:
+
+```text
+balance roundrobin
+```
+
+Round Robin was selected because the backend containers are homogeneous in this simulation. They run the same image, use the same configuration except `SERVER_NAME`, and handle similar short API requests. Sequential distribution is appropriate when servers have similar hardware and tasks take roughly similar time.
+
+### Architecture
+
+```text
+Client
+ -> HAProxy
+ -> web-1 / web-2 / web-3
+ -> shared PostgreSQL
+ -> shared Redis
+```
+
+PostgreSQL remains the shared relational database. Redis remains the shared service for checkout capacity control, cache settings, Celery broker, and Celery result backend.
+
+### Health Checks
+
+HAProxy uses a lightweight L7 HTTP health check:
+
+```text
+GET /api/health/
+```
+
+The endpoint returns `200 OK`, server identity, hostname, and timestamp. It does not perform expensive database work.
+
+### Statelessness
+
+The web containers are stateless enough for load balancing:
+
+- JWT authentication is carried by the request and is not stored inside one web container.
+- Orders, products, carts, payments, reports, and users are stored in shared PostgreSQL.
+- Checkout capacity control uses shared Redis, so the limit applies globally across web containers.
+- Celery queues are external to web containers and use Redis.
+
+This means any web container can handle any authenticated API request.
+
+### Proof
+
+The proof script is:
+
+```bash
+python scripts/load_distribution_test.py
+```
+
+Docker:
+
+```bash
+docker compose up --build
+docker compose exec web python scripts/load_distribution_test.py
+```
+
+Expected proof:
+
+| Metric                         | Expected                 |
+| ------------------------------ | ------------------------ |
+| Total requests                 | 60                       |
+| Successful responses           | 60                       |
+| Failed responses               | 0                        |
+| Backend servers reached        | web-1, web-2, web-3      |
+| Unique backend servers reached | 3                        |
+| Strategy                       | Round Robin              |
+| Result                         | PASSED                   |
+
+The script writes:
+
+```text
+results/load_distribution/load_distribution_task5_latest.json
+results/load_distribution/load_distribution_task5_YYYYMMDD_HHMMSS.json
+```
+
+### Key Files
+
+- `docker-compose.yml`
+- `infra/haproxy/haproxy.cfg`
+- `config/settings.py`
+- `performance/views.py`
+- `performance/system_urls.py`
+- `scripts/load_distribution_test.py`
+- `results/load_distribution/`
+
+### Connection To Earlier Tasks
+
+Task 1 still protects stock when checkout requests hit different web containers because PostgreSQL row locks are shared. Task 2 still works globally because the capacity limiter uses shared Redis. Task 3 Celery queues remain external to web containers. Task 4 batch jobs remain background Celery work. Task 5 scales the request handling layer without changing the monolithic application.
 
 ## 14. Redis Caching Plan
 
 To be completed in later phases.
 
-Planned focus: cache product list/detail responses and compare response duration before and after caching.
+Planned Task 6 focus: cache product list/detail responses and compare response duration before and after caching.
 
 ## 15. ACID Transaction Safety
 
@@ -415,9 +646,11 @@ The final demo should show:
 3. Run Task 1 race-condition proof.
 4. Run Task 2 resource-capacity proof.
 5. Run Task 3 asynchronous-queue proof.
-6. Show performance logs and capacity metrics.
-7. Demonstrate later batch, load distribution, caching, and benchmarking tasks as they are completed.
+6. Run Task 4 batch-processing proof.
+7. Run Task 5 load-distribution proof.
+8. Show performance logs, capacity metrics, batch runs, daily sales reports, and HAProxy stats.
+9. Demonstrate later caching and benchmarking tasks as they are completed.
 
 ## 19. Conclusion
 
-The project now has a correct transactional checkout foundation, a race-condition proof for shared stock, a Redis-backed capacity limiter that prevents excessive checkout parallelism, and Celery-backed asynchronous queue proof for non-critical checkout work. The remaining phases will extend the system with batch processing, load distribution, caching, stress testing, and benchmark documentation.
+The project now has a correct transactional checkout foundation, a race-condition proof for shared stock, a Redis-backed capacity limiter that prevents excessive checkout parallelism, Celery-backed asynchronous queue proof for non-critical checkout work, chunked Celery batch processing for daily sales reports, and HAProxy Round Robin distribution across three Django web containers. The remaining phases will extend the system with distributed caching, stress testing, and benchmark documentation.

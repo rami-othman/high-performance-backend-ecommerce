@@ -1,0 +1,124 @@
+{
+  "api_base_url": "http://127.0.0.1:8000",
+  "report_date": "2001-01-15",
+  "product_ids": [
+    14,
+    15,
+    16
+  ],
+  "order_count": 250,
+  "api_trigger": {
+    "status": 202,
+    "duration_ms": 79.57,
+    "response": {
+      "detail": "Daily sales batch processing queued.",
+      "batch_run_id": 3,
+      "report_date": "2001-01-15",
+      "chunk_size": 50,
+      "celery_task_id": "0ccff21f-1974-4b74-9a05-298c79ae8854"
+    }
+  },
+  "summary": {
+    "api_trigger_status": 202,
+    "generated_test_orders": 250,
+    "chunk_size": 50,
+    "expected_chunks": 5,
+    "actual_chunks_processed": 5,
+    "total_orders_in_batch": 250,
+    "total_order_items": 250,
+    "total_quantity_sold": 750,
+    "expected_total_quantity_sold": 750,
+    "total_sales": "11355.00",
+    "expected_total_sales": "11355.00",
+    "total_sales_correct": true,
+    "daily_sales_report_created": true,
+    "report_totals_match": true,
+    "celery_task_id_present": true,
+    "metadata_chunk_count": 5,
+    "all_chunks_within_chunk_size": true,
+    "batch_status": "success",
+    "passed": true
+  },
+  "batch_run": {
+    "id": 3,
+    "report_date": "2001-01-15",
+    "report_id": 5,
+    "celery_task_id": "0ccff21f-1974-4b74-9a05-298c79ae8854",
+    "status": "success",
+    "chunk_size": 50,
+    "chunks_processed": 5,
+    "total_orders": 250,
+    "total_order_items": 250,
+    "total_quantity_sold": 750,
+    "total_sales": "11355.00",
+    "started_at": "2026-05-18T08:43:32.663428+00:00",
+    "finished_at": "2026-05-18T08:43:32.701497+00:00",
+    "duration_ms": 38,
+    "metadata": {
+      "chunks": [
+        {
+          "chunk_sales": "2266.00",
+          "duration_ms": 4,
+          "chunk_number": 1,
+          "orders_count": 50,
+          "last_order_id": 688,
+          "quantity_sold": 150,
+          "first_order_id": 639,
+          "order_items_count": 50
+        },
+        {
+          "chunk_sales": "2264.00",
+          "duration_ms": 2,
+          "chunk_number": 2,
+          "orders_count": 50,
+          "last_order_id": 738,
+          "quantity_sold": 150,
+          "first_order_id": 689,
+          "order_items_count": 50
+        },
+        {
+          "chunk_sales": "2295.00",
+          "duration_ms": 3,
+          "chunk_number": 3,
+          "orders_count": 50,
+          "last_order_id": 788,
+          "quantity_sold": 150,
+          "first_order_id": 739,
+          "order_items_count": 50
+        },
+        {
+          "chunk_sales": "2266.00",
+          "duration_ms": 2,
+          "chunk_number": 4,
+          "orders_count": 50,
+          "last_order_id": 838,
+          "quantity_sold": 150,
+          "first_order_id": 789,
+          "order_items_count": 50
+        },
+        {
+          "chunk_sales": "2264.00",
+          "duration_ms": 2,
+          "chunk_number": 5,
+          "orders_count": 50,
+          "last_order_id": 888,
+          "quantity_sold": 150,
+          "first_order_id": 839,
+          "order_items_count": 50
+        }
+      ],
+      "algorithm": "keyset_pagination_by_order_id"
+    },
+    "error_message": ""
+  },
+  "daily_sales_report": {
+    "id": 5,
+    "date": "2001-01-15",
+    "total_orders": 250,
+    "total_order_items": 250,
+    "total_quantity_sold": 750,
+    "total_sales": "11355.00",
+    "best_selling_product_id": 14
+  },
+  "created_at": "2026-05-18T08:43:32"
+}
