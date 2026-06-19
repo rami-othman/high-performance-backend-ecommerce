@@ -2,6 +2,7 @@ from django.core.cache import cache
 
 
 X_CACHE_HEADER = "X-Cache"
+X_LOCK_HEADER = "X-Lock"
 CACHE_HIT = "HIT"
 CACHE_MISS = "MISS"
 
@@ -27,6 +28,17 @@ def daily_sales_batch_run_detail_cache_key(batch_run_id):
 
 def set_cache_header(response, cache_status):
     response[X_CACHE_HEADER] = cache_status
+    return response
+
+
+def set_lock_header(response, lock_status):
+    response[X_LOCK_HEADER] = lock_status
+    return response
+
+
+def set_cache_and_lock_headers(response, cache_status, lock_status):
+    set_cache_header(response, cache_status)
+    set_lock_header(response, lock_status)
     return response
 
 

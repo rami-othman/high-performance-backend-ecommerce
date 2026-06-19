@@ -1,0 +1,106 @@
+{
+  "total_attempts": 12,
+  "acquired_count": 3,
+  "blocked_count": 9,
+  "lock_keys_used": [
+    "lock:checkout:user:7007",
+    "lock:daily-sales:2001-07-07",
+    "lock:task7:threaded-proof"
+  ],
+  "result": "PASSED",
+  "proofs": [
+    {
+      "name": "threaded_single_lock",
+      "total_attempts": 8,
+      "acquired_count": 1,
+      "blocked_count": 7,
+      "lock_keys_used": [
+        "lock:task7:threaded-proof"
+      ],
+      "attempts": [
+        {
+          "attempt": 0,
+          "acquired": false,
+          "status": "BUSY",
+          "lock_key": "lock:task7:threaded-proof"
+        },
+        {
+          "attempt": 1,
+          "acquired": false,
+          "status": "BUSY",
+          "lock_key": "lock:task7:threaded-proof"
+        },
+        {
+          "attempt": 2,
+          "acquired": true,
+          "status": "WAITED",
+          "lock_key": "lock:task7:threaded-proof"
+        },
+        {
+          "attempt": 3,
+          "acquired": false,
+          "status": "BUSY",
+          "lock_key": "lock:task7:threaded-proof"
+        },
+        {
+          "attempt": 4,
+          "acquired": false,
+          "status": "BUSY",
+          "lock_key": "lock:task7:threaded-proof"
+        },
+        {
+          "attempt": 5,
+          "acquired": false,
+          "status": "BUSY",
+          "lock_key": "lock:task7:threaded-proof"
+        },
+        {
+          "attempt": 6,
+          "acquired": false,
+          "status": "BUSY",
+          "lock_key": "lock:task7:threaded-proof"
+        },
+        {
+          "attempt": 7,
+          "acquired": false,
+          "status": "BUSY",
+          "lock_key": "lock:task7:threaded-proof"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "name": "checkout_duplicate_submission",
+      "total_attempts": 2,
+      "acquired_count": 1,
+      "blocked_count": 1,
+      "lock_keys_used": [
+        "lock:checkout:user:7007"
+      ],
+      "first_status": "ACQUIRED",
+      "second_status": "BUSY",
+      "expected_busy_code": "checkout_lock_busy",
+      "passed": true
+    },
+    {
+      "name": "daily_sales_same_date_task",
+      "total_attempts": 2,
+      "acquired_count": 1,
+      "blocked_count": 1,
+      "lock_keys_used": [
+        "lock:daily-sales:2001-07-07"
+      ],
+      "held_lock_status": "ACQUIRED",
+      "task_result": {
+        "status": "skipped",
+        "reason": "distributed_lock_busy",
+        "batch_run_id": 9,
+        "report_date": "2001-07-07",
+        "chunk_size": 2
+      },
+      "batch_run_status": "failure",
+      "passed": true
+    }
+  ],
+  "created_at": "2026-06-19T21:37:56"
+}

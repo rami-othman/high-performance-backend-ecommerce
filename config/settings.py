@@ -141,6 +141,7 @@ SPECTACULAR_SETTINGS = {
 CORS_ALLOW_ALL_ORIGINS = DEBUG
 
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+CACHE_URL = os.getenv("CACHE_URL", REDIS_URL)
 CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", REDIS_URL)
 CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", REDIS_URL)
 CELERY_TASK_ALWAYS_EAGER = os.getenv("CELERY_TASK_ALWAYS_EAGER", "False").lower() == "true"
@@ -164,12 +165,17 @@ DAILY_SALES_BATCH_TEST_CHUNK_SIZE = env_int(
     min_value=1,
     max_value=1000,
 )
+DAILY_SALES_DISTRIBUTED_LOCK_TIMEOUT_SECONDS = env_int(
+    "DAILY_SALES_DISTRIBUTED_LOCK_TIMEOUT_SECONDS",
+    300,
+    min_value=1,
+)
 LOAD_BALANCER_TEST_REQUESTS = env_int("LOAD_BALANCER_TEST_REQUESTS", 60, min_value=1)
 LOAD_BALANCER_TEST_BASE_URL = os.getenv("LOAD_BALANCER_TEST_BASE_URL", "")
 
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.redis.RedisCache",
-        "LOCATION": os.getenv("CACHE_URL", REDIS_URL),
+        "LOCATION": CACHE_URL,
     }
 }

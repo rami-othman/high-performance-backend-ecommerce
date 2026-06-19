@@ -1,5 +1,6 @@
 from datetime import datetime, time, timedelta
 from decimal import Decimal
+from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
@@ -15,6 +16,22 @@ from products.models import Product
 from .models import DailySalesBatchRun, DailySalesReport
 from .serializers import DailySalesBatchRequestSerializer
 from .tasks import process_daily_sales_report_task
+
+
+class TestDistributedLock:
+    def __init__(self, acquired=True, status="ACQUIRED", on_enter=None):
+        self.acquired = acquired
+        self.status = status
+        self.error = None
+        self.on_enter = on_enter
+
+    def __enter__(self):
+        if self.on_enter is not None:
+            self.on_enter()
+        return self
+
+    def __exit__(self, exc_type, exc, traceback):
+        return False
 
 
 @override_settings(
@@ -150,14 +167,46 @@ class DailySalesBatchProcessingTests(TestCase):
         )
         url = reverse("daily-sales-list")
 
-        first_response = self.client.get(url)
+        with patch("reports.views.redis_distributed_lock", return_value=TestDistributedLock()):
+            first_response = self.client.get(url)
         second_response = self.client.get(url)
 
         self.assertEqual(first_response.status_code, status.HTTP_200_OK)
         self.assertEqual(second_response.status_code, status.HTTP_200_OK)
         self.assertEqual(first_response["X-Cache"], "MISS")
+        self.assertEqual(first_response["X-Lock"], "ACQUIRED")
         self.assertEqual(second_response["X-Cache"], "HIT")
         self.assertEqual(first_response.data, second_response.data)
+
+    def test_daily_sales_report_list_returns_waited_hit_when_another_worker_rebuilt_cache(self):
+        url = reverse("daily-sales-list")
+        cached_payload = [{"date": str(self.report_date), "total_orders": 1}]
+
+        def seed_cache_after_wait():
+            cache.set("reports:daily-sales:list:v1", cached_payload)
+
+        with patch(
+            "reports.views.redis_distributed_lock",
+            return_value=TestDistributedLock(acquired=False, status="BUSY", on_enter=seed_cache_after_wait),
+        ):
+            response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response["X-Cache"], "HIT")
+        self.assertEqual(response["X-Lock"], "WAITED")
+        self.assertEqual(response.data, cached_payload)
+
+    def test_daily_sales_report_list_returns_busy_when_rebuild_lock_busy_and_cache_still_missing(self):
+        url = reverse("daily-sales-list")
+
+        with patch(
+            "reports.views.redis_distributed_lock",
+            return_value=TestDistributedLock(acquired=False, status="BUSY"),
+        ):
+            response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_503_SERVICE_UNAVAILABLE)
+        self.assertEqual(response.data["code"], "cache_rebuild_lock_busy")
 
     def test_daily_sales_batch_run_detail_marks_first_response_miss_then_hit(self):
         batch_run = DailySalesBatchRun.objects.create(
@@ -167,11 +216,54 @@ class DailySalesBatchProcessingTests(TestCase):
         )
         url = reverse("daily-sales-batch-run-detail", args=[batch_run.id])
 
-        first_response = self.client.get(url)
+        with patch("reports.views.redis_distributed_lock", return_value=TestDistributedLock()):
+            first_response = self.client.get(url)
         second_response = self.client.get(url)
 
         self.assertEqual(first_response.status_code, status.HTTP_200_OK)
         self.assertEqual(second_response.status_code, status.HTTP_200_OK)
         self.assertEqual(first_response["X-Cache"], "MISS")
+        self.assertEqual(first_response["X-Lock"], "ACQUIRED")
         self.assertEqual(second_response["X-Cache"], "HIT")
         self.assertEqual(first_response.data, second_response.data)
+
+    def test_daily_sales_batch_run_detail_returns_busy_when_rebuild_lock_busy_and_cache_still_missing(self):
+        batch_run = DailySalesBatchRun.objects.create(
+            report_date=self.report_date,
+            chunk_size=2,
+            metadata={"chunks": [], "algorithm": "keyset_pagination_by_order_id"},
+        )
+        url = reverse("daily-sales-batch-run-detail", args=[batch_run.id])
+
+        with patch(
+            "reports.views.redis_distributed_lock",
+            return_value=TestDistributedLock(acquired=False, status="BUSY"),
+        ):
+            response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_503_SERVICE_UNAVAILABLE)
+        self.assertEqual(response.data["code"], "cache_rebuild_lock_busy")
+
+    def test_batch_task_skips_when_daily_sales_distributed_lock_is_busy(self):
+        batch_run = DailySalesBatchRun.objects.create(
+            report_date=self.report_date,
+            chunk_size=2,
+        )
+
+        with patch(
+            "reports.tasks.redis_distributed_lock",
+            return_value=TestDistributedLock(acquired=False, status="BUSY"),
+        ):
+            result = process_daily_sales_report_task.apply(
+                kwargs={
+                    "report_date": str(self.report_date),
+                    "batch_run_id": batch_run.id,
+                    "chunk_size": 2,
+                }
+            ).get()
+
+        batch_run.refresh_from_db()
+        self.assertEqual(result["status"], "skipped")
+        self.assertEqual(result["reason"], "distributed_lock_busy")
+        self.assertEqual(batch_run.status, DailySalesBatchRun.Status.FAILURE)
+        self.assertIn("distributed_lock_busy", batch_run.error_message)

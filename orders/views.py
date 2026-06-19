@@ -1,7 +1,6 @@
 from decimal import Decimal
 import time
 from uuid import uuid4
-import redis
 
 from django.conf import settings
 from django.db import transaction
@@ -14,6 +13,7 @@ from rest_framework.views import APIView
 from cart.models import Cart
 from payments.models import Payment
 from performance.capacity_limiter import CheckoutCapacityLimiter, CheckoutCapacityUnavailable
+from performance.distributed_locks import LOCK_BUSY, checkout_user_lock_key, redis_distributed_lock
 from products.cache_utils import invalidate_checkout_related_caches
 from products.models import Product
 from .models import Order, OrderBackgroundTask, OrderItem
@@ -22,8 +22,6 @@ from .tasks import generate_invoice_task, send_order_notification_task
 
 
 RACE_CONDITION_TEST_CAPACITY_LIMIT_HEADER = "X-Race-Condition-Test-Capacity-Limit"
-
-redis_client = redis.Redis.from_url(settings.REDIS_URL)
 
 
 def dispatch_order_tasks(order_id):
@@ -61,74 +59,84 @@ class CheckoutView(APIView):
             if not capacity.acquired:
                 return Response({"detail": "Busy"}, status=status.HTTP_429_TOO_MANY_REQUESTS)
 
-            apply_capacity_test_delay(request)
-            return self.run_checkout(request)
-
-    def run_checkout(self, request):
-
-        lock = redis_client.lock(f"checkout_lock_{request.user.id}", timeout=10)
-
-        with lock:
-            with transaction.atomic():
-
-                cart = Cart.objects.select_for_update().get(user=request.user)
-                cart_items = list(cart.items.select_related("product").all())
-
-                product_ids = sorted({i.product_id for i in cart_items})
-
-                locked_products = {
-                    p.id: p for p in Product.objects.select_for_update().filter(id__in=product_ids)
-                }
-
-                total_price = Decimal("0.00")
-
-                for item in cart_items:
-                    product = locked_products[item.product_id]
-                    if product.stock < item.quantity:
-                        return Response({"error": "Out of stock"}, status=400)
-
-                    total_price += product.price * item.quantity
-
-                order = Order.objects.create(
-                    user=request.user,
-                    total_price=total_price,
-                    status=Order.Status.PAID,
-                )
-
-                order_items = []
-
-                for item in cart_items:
-                    product = locked_products[item.product_id]
-
-                    order_items.append(
-                        OrderItem(
-                            order=order,
-                            product=product,
-                            quantity=item.quantity,
-                            unit_price=product.price,
-                            total_price=product.price * item.quantity,
-                        )
+            with redis_distributed_lock(
+                checkout_user_lock_key(request.user.id),
+                timeout=15,
+                blocking_timeout=0,
+            ) as checkout_lock:
+                if not checkout_lock.acquired and checkout_lock.status == LOCK_BUSY:
+                    return Response(
+                        {
+                            "code": "checkout_lock_busy",
+                            "detail": "Checkout is already running for this user.",
+                        },
+                        status=status.HTTP_429_TOO_MANY_REQUESTS,
                     )
 
-                    product.stock -= item.quantity
-                    product.save(update_fields=["stock"])
+                apply_capacity_test_delay(request)
+                return self.run_checkout(request)
 
-                OrderItem.objects.bulk_create(order_items)
+    def run_checkout(self, request):
+        with transaction.atomic():
 
-                Payment.objects.create(
-                    order=order,
-                    amount=total_price,
-                    status=Payment.Status.COMPLETED,
-                    transaction_reference=f"TXN-{uuid4().hex[:20].upper()}",
+            cart = Cart.objects.select_for_update().get(user=request.user)
+            cart_items = list(cart.items.select_related("product").all())
+
+            product_ids = sorted({i.product_id for i in cart_items})
+
+            locked_products = {
+                p.id: p for p in Product.objects.select_for_update().filter(id__in=product_ids)
+            }
+
+            total_price = Decimal("0.00")
+
+            for item in cart_items:
+                product = locked_products[item.product_id]
+                if product.stock < item.quantity:
+                    return Response({"error": "Out of stock"}, status=400)
+
+                total_price += product.price * item.quantity
+
+            order = Order.objects.create(
+                user=request.user,
+                total_price=total_price,
+                status=Order.Status.PAID,
+            )
+
+            order_items = []
+
+            for item in cart_items:
+                product = locked_products[item.product_id]
+
+                order_items.append(
+                    OrderItem(
+                        order=order,
+                        product=product,
+                        quantity=item.quantity,
+                        unit_price=product.price,
+                        total_price=product.price * item.quantity,
+                    )
                 )
 
-                cart.items.all().delete()
+                product.stock -= item.quantity
+                product.save(update_fields=["stock"])
 
-                changed_product_ids = list(product_ids)
-                transaction.on_commit(
-                    lambda product_ids=changed_product_ids: invalidate_checkout_related_caches(product_ids)
-                )
-                transaction.on_commit(lambda: dispatch_order_tasks(order.id))
+            OrderItem.objects.bulk_create(order_items)
+
+            Payment.objects.create(
+                order=order,
+                amount=total_price,
+                status=Payment.Status.COMPLETED,
+                transaction_reference=f"TXN-{uuid4().hex[:20].upper()}",
+            )
+
+            cart.items.all().delete()
+
+            changed_product_ids = list(product_ids)
+            transaction.on_commit(
+                lambda product_ids=changed_product_ids: invalidate_checkout_related_caches(product_ids)
+            )
+            transaction.on_commit(lambda: dispatch_order_tasks(order.id))
 
         return Response(
             {

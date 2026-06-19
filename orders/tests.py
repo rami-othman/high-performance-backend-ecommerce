@@ -33,17 +33,17 @@ class TestCheckoutCapacityLimiter:
         return False
 
 
-class TestRedisLock:
+class TestDistributedLock:
+    def __init__(self, acquired=True, status="ACQUIRED"):
+        self.acquired = acquired
+        self.status = status
+        self.error = None
+
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type, exc, traceback):
         return False
-
-
-class TestRedisClient:
-    def lock(self, *args, **kwargs):
-        return TestRedisLock()
 
 
 @override_settings(
@@ -58,9 +58,12 @@ class CheckoutTests(TestCase):
         )
         self.client = APIClient()
         self.client.force_authenticate(user=self.user)
-        self.redis_client_patcher = patch("orders.views.redis_client", TestRedisClient())
-        self.redis_client_patcher.start()
-        self.addCleanup(self.redis_client_patcher.stop)
+        self.distributed_lock_patcher = patch(
+            "orders.views.redis_distributed_lock",
+            return_value=TestDistributedLock(),
+        )
+        self.distributed_lock_patcher.start()
+        self.addCleanup(self.distributed_lock_patcher.stop)
 
     def tearDown(self):
         cache.clear()
@@ -91,6 +94,25 @@ class CheckoutTests(TestCase):
         self.assertEqual(product.stock, 8)
         self.assertEqual(cart.items.count(), 0)
         self.assertTrue(Payment.objects.filter(order=order, status=Payment.Status.COMPLETED).exists())
+
+    def test_checkout_returns_busy_when_duplicate_submission_lock_is_held(self):
+        product = Product.objects.create(
+            name="Duplicate Lock Product",
+            price=Decimal("10.00"),
+            stock=3,
+        )
+        cart = Cart.objects.create(user=self.user)
+        CartItem.objects.create(cart=cart, product=product, quantity=1)
+
+        with (
+            patch("orders.views.CheckoutCapacityLimiter", return_value=TestCheckoutCapacityLimiter()),
+            patch("orders.views.redis_distributed_lock", return_value=TestDistributedLock(acquired=False, status="BUSY")),
+        ):
+            response = self.client.post(reverse("checkout"))
+
+        self.assertEqual(response.status_code, status.HTTP_429_TOO_MANY_REQUESTS)
+        self.assertEqual(response.data["code"], "checkout_lock_busy")
+        self.assertEqual(Order.objects.count(), 0)
 
     def test_checkout_invalidates_product_and_report_caches_after_stock_changes(self):
         product = Product.objects.create(

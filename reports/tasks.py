@@ -8,6 +8,7 @@ from django.db.models import Count, Sum
 from django.utils import timezone
 
 from orders.models import Order, OrderItem
+from performance.distributed_locks import LOCK_BUSY, daily_sales_report_lock_key, redis_distributed_lock
 from products.cache_utils import invalidate_daily_sales_report_caches
 from .models import DailySalesBatchRun, DailySalesReport
 
@@ -37,10 +38,58 @@ def decimal_or_zero(value):
     return value if value is not None else Decimal("0.00")
 
 
+def mark_daily_sales_batch_run_skipped(report_date, batch_run_id, chunk_size, reason):
+    batch_run = None
+    if batch_run_id:
+        batch_run = DailySalesBatchRun.objects.filter(id=batch_run_id).first()
+
+    if batch_run is not None:
+        batch_run.report_date = report_date
+        batch_run.chunk_size = chunk_size
+        batch_run.status = DailySalesBatchRun.Status.FAILURE
+        batch_run.error_message = f"Skipped because {reason}."
+        batch_run.finished_at = timezone.now()
+        batch_run.save(
+            update_fields=[
+                "report_date",
+                "chunk_size",
+                "status",
+                "error_message",
+                "finished_at",
+                "updated_at",
+            ]
+        )
+
+    return {
+        "status": "skipped",
+        "reason": reason,
+        "batch_run_id": batch_run.id if batch_run else batch_run_id,
+        "report_date": str(report_date),
+        "chunk_size": chunk_size,
+    }
+
+
 @shared_task(bind=True)
 def process_daily_sales_report_task(self, report_date=None, batch_run_id=None, chunk_size=None):
     report_date = parse_report_date(report_date)
     chunk_size = normalize_chunk_size(chunk_size)
+    with redis_distributed_lock(
+        daily_sales_report_lock_key(report_date),
+        timeout=getattr(settings, "DAILY_SALES_DISTRIBUTED_LOCK_TIMEOUT_SECONDS", 300),
+        blocking_timeout=0,
+    ) as report_lock:
+        if not report_lock.acquired and report_lock.status == LOCK_BUSY:
+            return mark_daily_sales_batch_run_skipped(
+                report_date=report_date,
+                batch_run_id=batch_run_id,
+                chunk_size=chunk_size,
+                reason="distributed_lock_busy",
+            )
+
+        return run_daily_sales_report_processing(self, report_date, batch_run_id, chunk_size)
+
+
+def run_daily_sales_report_processing(task, report_date, batch_run_id, chunk_size):
     started_at = timezone.now()
     batch_run = None
 
@@ -55,7 +104,7 @@ def process_daily_sales_report_task(self, report_date=None, batch_run_id=None, c
 
         batch_run.report_date = report_date
         batch_run.chunk_size = chunk_size
-        batch_run.celery_task_id = self.request.id
+        batch_run.celery_task_id = task.request.id
         batch_run.status = DailySalesBatchRun.Status.STARTED
         batch_run.started_at = started_at
         batch_run.finished_at = None
