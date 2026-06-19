@@ -526,3 +526,74 @@ class AcidTransactionScriptTests(TestCase):
         self.assertFalse(result["passed"])
         self.assertEqual(result["success_case"], {"passed": True})
         self.assertEqual(result["rollback_case"], {"passed": False})
+
+
+class StressTestScriptTests(TestCase):
+    def test_calculate_timing_summary_includes_average_p95_and_rps(self):
+        from scripts.stress_test_100_users import calculate_timing_summary
+
+        summary = calculate_timing_summary(
+            [
+                {"operation": "login", "duration_ms": 10.0, "status_code": 200},
+                {"operation": "login", "duration_ms": 30.0, "status_code": 200},
+                {"operation": "checkout", "duration_ms": 50.0, "status_code": 201},
+                {"operation": "checkout", "duration_ms": 70.0, "status_code": 500},
+            ],
+            total_duration_seconds=2.0,
+        )
+
+        self.assertEqual(summary["total_requests"], 4)
+        self.assertEqual(summary["average_response_time_ms"], 40.0)
+        self.assertEqual(summary["min_response_time_ms"], 10.0)
+        self.assertEqual(summary["max_response_time_ms"], 70.0)
+        self.assertEqual(summary["p95_response_time_ms"], 70.0)
+        self.assertEqual(summary["requests_per_second"], 2.0)
+        self.assertEqual(summary["error_rate"], 0.25)
+        self.assertEqual(summary["status_code_distribution"], {"200": 2, "201": 1, "500": 1})
+        self.assertEqual(summary["per_operation"]["login"]["count"], 2)
+        self.assertEqual(summary["per_operation"]["checkout"]["errors"], 1)
+
+    def test_build_data_integrity_summary_detects_overselling_and_count_mismatch(self):
+        from scripts.stress_test_100_users import build_data_integrity_summary
+
+        summary = build_data_integrity_summary(
+            initial_stock_by_product={1: 5, 2: 5},
+            final_stock_by_product={1: 1, 2: -1},
+            sold_quantity_by_product={1: 4, 2: 7},
+            successful_checkout_count=10,
+            order_count=9,
+            payment_count=10,
+        )
+
+        self.assertFalse(summary["passed"])
+        self.assertTrue(summary["negative_stock"])
+        self.assertTrue(summary["overselling"])
+        self.assertFalse(summary["orders_match_successful_checkouts"])
+        self.assertTrue(summary["payments_match_successful_checkouts"])
+
+    def test_report_operation_status_rules_require_admin_success_but_allow_regular_forbidden(self):
+        from scripts.stress_test_100_users import allowed_statuses_for_operation, build_summary
+
+        self.assertEqual(allowed_statuses_for_operation("get_daily_sales_report_as_regular_user"), {200, 403})
+        self.assertEqual(allowed_statuses_for_operation("get_daily_sales_report_as_admin"), {200})
+
+        summary = build_summary(
+            total_users=100,
+            user_results=[{"checkout_success": True, "success": True} for _ in range(100)],
+            request_records=[],
+            failed_requests=[],
+            timing_summary={
+                "total_requests": 0,
+                "average_response_time_ms": 0,
+                "min_response_time_ms": 0,
+                "max_response_time_ms": 0,
+                "p95_response_time_ms": 0,
+                "requests_per_second": 0,
+                "error_rate": 0,
+                "status_code_distribution": {},
+            },
+            data_integrity={"passed": True},
+            report_operations_passed=False,
+        )
+
+        self.assertFalse(summary["passed"])
