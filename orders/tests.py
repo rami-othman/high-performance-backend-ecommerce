@@ -1,10 +1,12 @@
 from decimal import Decimal
+from threading import Barrier, Thread
 from types import SimpleNamespace
 from unittest.mock import patch
 
 from django.core.cache import cache
 from django.contrib.auth import get_user_model
-from django.test import TestCase, override_settings
+from django.db import connections
+from django.test import TestCase, TransactionTestCase, override_settings
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
@@ -20,7 +22,7 @@ from products.cache_utils import (
 )
 from products.models import Product
 from reports.models import DailySalesBatchRun
-from .models import Order, OrderBackgroundTask
+from .models import Order, OrderBackgroundTask, OrderItem
 
 
 class TestCheckoutCapacityLimiter:
@@ -68,7 +70,7 @@ class CheckoutTests(TestCase):
     def tearDown(self):
         cache.clear()
 
-    def test_checkout_creates_order_updates_stock_clears_cart_and_creates_payment(self):
+    def test_checkout_creates_order_items_payment_updates_stock_clears_cart_and_dispatches_after_commit(self):
         product = Product.objects.create(
             name="Test Product",
             price=Decimal("12.50"),
@@ -77,13 +79,26 @@ class CheckoutTests(TestCase):
         cart = Cart.objects.create(user=self.user)
         CartItem.objects.create(cart=cart, product=product, quantity=2)
 
-        with patch("orders.views.CheckoutCapacityLimiter", return_value=TestCheckoutCapacityLimiter()):
+        with (
+            patch("orders.views.CheckoutCapacityLimiter", return_value=TestCheckoutCapacityLimiter()),
+            patch(
+                "orders.views.generate_invoice_task.delay",
+                return_value=SimpleNamespace(id="invoice-task-id"),
+            ) as invoice_delay,
+            patch(
+                "orders.views.send_order_notification_task.delay",
+                return_value=SimpleNamespace(id="notification-task-id"),
+            ) as notification_delay,
+            self.captureOnCommitCallbacks(execute=True),
+        ):
             response = self.client.post(reverse("checkout"))
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Order.objects.count(), 1)
+        self.assertEqual(OrderItem.objects.count(), 1)
 
         order = Order.objects.get()
+        order_item = OrderItem.objects.get(order=order)
         product.refresh_from_db()
         cart.refresh_from_db()
 
@@ -93,7 +108,90 @@ class CheckoutTests(TestCase):
         self.assertEqual(response.data["message"], "Checkout completed successfully.")
         self.assertEqual(product.stock, 8)
         self.assertEqual(cart.items.count(), 0)
+        self.assertEqual(order_item.product, product)
+        self.assertEqual(order_item.quantity, 2)
+        self.assertEqual(order_item.unit_price, Decimal("12.50"))
+        self.assertEqual(order_item.total_price, Decimal("25.00"))
         self.assertTrue(Payment.objects.filter(order=order, status=Payment.Status.COMPLETED).exists())
+        invoice_delay.assert_called_once_with(
+            order.id,
+            background_task_id=OrderBackgroundTask.objects.get(task_name="generate_invoice_task").id,
+        )
+        notification_delay.assert_called_once_with(
+            order.id,
+            background_task_id=OrderBackgroundTask.objects.get(task_name="send_order_notification_task").id,
+        )
+
+    @override_settings(DEBUG=True)
+    def test_debug_failure_after_stock_rolls_back_checkout_and_skips_post_commit_work(self):
+        product = Product.objects.create(
+            name="Rollback Product",
+            price=Decimal("20.00"),
+            stock=7,
+        )
+        cart = Cart.objects.create(user=self.user)
+        CartItem.objects.create(cart=cart, product=product, quantity=3)
+
+        cache.set(PRODUCT_LIST_CACHE_KEY, [{"id": product.id, "stock": product.stock}])
+        cache.set(product_detail_cache_key(product.id), {"id": product.id, "stock": product.stock})
+        self.client.raise_request_exception = False
+
+        with (
+            patch("orders.views.CheckoutCapacityLimiter", return_value=TestCheckoutCapacityLimiter()),
+            patch("orders.views.invalidate_checkout_related_caches") as invalidate_caches,
+            patch(
+                "orders.views.generate_invoice_task.delay",
+                return_value=SimpleNamespace(id="invoice-task-id"),
+            ) as invoice_delay,
+            patch(
+                "orders.views.send_order_notification_task.delay",
+                return_value=SimpleNamespace(id="notification-task-id"),
+            ) as notification_delay,
+            self.captureOnCommitCallbacks(execute=True) as callbacks,
+        ):
+            response = self.client.post(
+                reverse("checkout"),
+                HTTP_X_DEBUG_FAIL_CHECKOUT_AFTER_STOCK="1",
+            )
+
+        self.assertEqual(response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
+        self.assertEqual(callbacks, [])
+        self.assertEqual(Order.objects.count(), 0)
+        self.assertEqual(OrderItem.objects.count(), 0)
+        self.assertEqual(Payment.objects.count(), 0)
+        self.assertEqual(OrderBackgroundTask.objects.count(), 0)
+        product.refresh_from_db()
+        self.assertEqual(product.stock, 7)
+        self.assertEqual(cart.items.count(), 1)
+        self.assertEqual(cart.items.get(product=product).quantity, 3)
+        invalidate_caches.assert_not_called()
+        invoice_delay.assert_not_called()
+        notification_delay.assert_not_called()
+        self.assertIsNotNone(cache.get(PRODUCT_LIST_CACHE_KEY))
+        self.assertIsNotNone(cache.get(product_detail_cache_key(product.id)))
+
+    @override_settings(DEBUG=False, TESTING=False)
+    def test_debug_failure_header_is_ignored_outside_debug_or_testing(self):
+        product = Product.objects.create(
+            name="Production Guard Product",
+            price=Decimal("9.00"),
+            stock=2,
+        )
+        cart = Cart.objects.create(user=self.user)
+        CartItem.objects.create(cart=cart, product=product, quantity=1)
+
+        with patch("orders.views.CheckoutCapacityLimiter", return_value=TestCheckoutCapacityLimiter()):
+            response = self.client.post(
+                reverse("checkout"),
+                HTTP_X_DEBUG_FAIL_CHECKOUT_AFTER_STOCK="1",
+            )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Order.objects.count(), 1)
+        self.assertEqual(Payment.objects.count(), 1)
+        product.refresh_from_db()
+        self.assertEqual(product.stock, 1)
+        self.assertEqual(cart.items.count(), 0)
 
     def test_checkout_returns_busy_when_duplicate_submission_lock_is_held(self):
         product = Product.objects.create(
@@ -311,6 +409,70 @@ class CheckoutCapacityTestLimitOverrideTests(TestCase):
         self.assertEqual(get_checkout_capacity_limit(request), 5)
 
 
+@override_settings(
+    CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}},
+)
+class ConcurrentCheckoutTransactionTests(TransactionTestCase):
+    reset_sequences = True
+
+    def setUp(self):
+        cache.clear()
+        self.distributed_lock_patcher = patch(
+            "orders.views.redis_distributed_lock",
+            return_value=TestDistributedLock(),
+        )
+        self.distributed_lock_patcher.start()
+        self.addCleanup(self.distributed_lock_patcher.stop)
+
+    def tearDown(self):
+        cache.clear()
+
+    def test_concurrent_checkout_does_not_oversell_shared_stock(self):
+        product = Product.objects.create(
+            name="Concurrent Product",
+            price=Decimal("11.00"),
+            stock=1,
+        )
+        User = get_user_model()
+        users = []
+        for index in range(2):
+            user = User.objects.create_user(
+                username=f"concurrent-user-{index}",
+                password="strong-password",
+            )
+            cart = Cart.objects.create(user=user)
+            CartItem.objects.create(cart=cart, product=product, quantity=1)
+            users.append(user)
+
+        barrier = Barrier(len(users))
+        results = []
+
+        def checkout(user):
+            try:
+                client = APIClient()
+                client.force_authenticate(user=user)
+                barrier.wait(timeout=5)
+                with patch("orders.views.CheckoutCapacityLimiter", return_value=TestCheckoutCapacityLimiter()):
+                    response = client.post(reverse("checkout"))
+                results.append(response.status_code)
+            finally:
+                connections.close_all()
+
+        threads = [Thread(target=checkout, args=(user,)) for user in users]
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join(timeout=10)
+        connections.close_all()
+
+        self.assertEqual(sorted(results), [status.HTTP_201_CREATED, status.HTTP_400_BAD_REQUEST])
+        product.refresh_from_db()
+        self.assertEqual(product.stock, 0)
+        self.assertEqual(Order.objects.count(), 1)
+        self.assertEqual(OrderItem.objects.filter(product=product).count(), 1)
+        self.assertEqual(Payment.objects.count(), 1)
+
+
 class AsyncQueueScriptTests(TestCase):
     def test_build_summary_requires_successful_background_tasks_and_fast_checkout(self):
         from scripts.async_queue_test import build_summary
@@ -347,3 +509,20 @@ class AsyncQueueScriptTests(TestCase):
         self.assertEqual(summary["background_task_count"], 2)
         self.assertEqual(summary["successful_background_task_count"], 2)
         self.assertEqual(summary["total_background_duration_ms"], 2000)
+
+
+class AcidTransactionScriptTests(TestCase):
+    def test_build_result_requires_success_and_rollback_cases_to_pass(self):
+        from scripts.acid_transaction_test import build_result
+
+        result = build_result(
+            success_case={"passed": True},
+            rollback_case={"passed": False},
+            initial_state={"orders": 0, "payments": 0},
+            final_state={"orders": 1, "payments": 1},
+        )
+
+        self.assertEqual(result["result"], "FAILED")
+        self.assertFalse(result["passed"])
+        self.assertEqual(result["success_case"], {"passed": True})
+        self.assertEqual(result["rollback_case"], {"passed": False})

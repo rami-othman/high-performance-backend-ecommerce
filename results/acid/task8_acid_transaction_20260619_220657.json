@@ -1,0 +1,101 @@
+{
+  "success_case": {
+    "status_code": 201,
+    "response": {
+      "order_id": 1441,
+      "total_price": "26.00",
+      "status": "paid",
+      "message": "Checkout completed successfully.",
+      "background_tasks_dispatched": true
+    },
+    "duration_ms": 250.27,
+    "checks": {
+      "checkout_returned_201": true,
+      "stock_reduced": true,
+      "cart_cleared": true,
+      "order_created": true,
+      "order_item_created": true,
+      "payment_created": true
+    },
+    "passed": true
+  },
+  "rollback_case": {
+    "status_code": 500,
+    "response": {
+      "raw_body": "\n<!doctype html>\n<html lang=\"en\">\n<head>\n  <title>Server Error (500)</title>\n</head>\n<body>\n  <h1>Server Error (500)</h1><p></p>\n</body>\n</html>\n"
+    },
+    "duration_ms": 74.97,
+    "checks": {
+      "checkout_failed": true,
+      "stock_unchanged": true,
+      "cart_unchanged": true,
+      "no_order_created": true,
+      "no_order_item_created": true,
+      "no_payment_created": true,
+      "no_background_task_created": true
+    },
+    "passed": true
+  },
+  "initial_state": {
+    "success_case": {
+      "user_id": 647,
+      "username": "acid_task8_user_success_20260619220654682680",
+      "product_id": 26,
+      "product_name": "ACID Task 8 Product success 20260619220654682680",
+      "product_stock": 5,
+      "cart_item_count": 1,
+      "cart_quantity": 2,
+      "order_count": 0,
+      "order_item_count": 0,
+      "payment_count": 0,
+      "background_task_count": 0
+    },
+    "rollback_case": {
+      "user_id": 648,
+      "username": "acid_task8_user_rollback_20260619220656167559",
+      "product_id": 27,
+      "product_name": "ACID Task 8 Product rollback 20260619220656167559",
+      "product_stock": 5,
+      "cart_item_count": 1,
+      "cart_quantity": 2,
+      "order_count": 0,
+      "order_item_count": 0,
+      "payment_count": 0,
+      "background_task_count": 0
+    }
+  },
+  "final_state": {
+    "success_case": {
+      "user_id": 647,
+      "username": "acid_task8_user_success_20260619220654682680",
+      "product_id": 26,
+      "product_name": "ACID Task 8 Product success 20260619220654682680",
+      "product_stock": 3,
+      "cart_item_count": 0,
+      "cart_quantity": 0,
+      "order_count": 1,
+      "order_item_count": 1,
+      "payment_count": 1,
+      "background_task_count": 2
+    },
+    "rollback_case": {
+      "user_id": 648,
+      "username": "acid_task8_user_rollback_20260619220656167559",
+      "product_id": 27,
+      "product_name": "ACID Task 8 Product rollback 20260619220656167559",
+      "product_stock": 5,
+      "cart_item_count": 1,
+      "cart_quantity": 2,
+      "order_count": 0,
+      "order_item_count": 0,
+      "payment_count": 0,
+      "background_task_count": 0
+    }
+  },
+  "result": "PASSED",
+  "passed": true,
+  "debug_failure_enabled": true,
+  "created_at": "2026-06-19T22:06:57",
+  "api_base_url": "http://127.0.0.1:8018",
+  "failure_header": "X-Debug-Fail-Checkout-After-Stock"
+}

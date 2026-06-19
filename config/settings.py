@@ -27,6 +27,7 @@ def env_int(name, default, min_value=None, max_value=None):
 
 SECRET_KEY = os.getenv("SECRET_KEY", "dev-only-change-me")
 DEBUG = os.getenv("DEBUG", "True").lower() == "true"
+TESTING = env_bool("TESTING", False)
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,0.0.0.0").split(",")
 SERVER_NAME = os.getenv("SERVER_NAME", socket.gethostname())
 

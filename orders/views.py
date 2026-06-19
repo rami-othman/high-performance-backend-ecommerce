@@ -22,6 +22,8 @@ from .tasks import generate_invoice_task, send_order_notification_task
 
 
 RACE_CONDITION_TEST_CAPACITY_LIMIT_HEADER = "X-Race-Condition-Test-Capacity-Limit"
+DEBUG_FAIL_CHECKOUT_AFTER_STOCK_HEADER = "X-Debug-Fail-Checkout-After-Stock"
+DEBUG_FAIL_CHECKOUT_AFTER_STOCK_QUERY_PARAM = "debug_fail_checkout_after_stock"
 
 
 def dispatch_order_tasks(order_id):
@@ -80,12 +82,13 @@ class CheckoutView(APIView):
         with transaction.atomic():
 
             cart = Cart.objects.select_for_update().get(user=request.user)
-            cart_items = list(cart.items.select_related("product").all())
+            cart_items = list(cart.items.select_for_update().order_by("product_id", "id"))
 
             product_ids = sorted({i.product_id for i in cart_items})
 
             locked_products = {
-                p.id: p for p in Product.objects.select_for_update().filter(id__in=product_ids)
+                p.id: p
+                for p in Product.objects.select_for_update().filter(id__in=product_ids).order_by("id")
             }
 
             total_price = Decimal("0.00")
@@ -138,6 +141,8 @@ class CheckoutView(APIView):
             )
             transaction.on_commit(lambda: dispatch_order_tasks(order.id))
 
+            fail_checkout_after_stock_if_requested(request)
+
         return Response(
             {
                 "order_id": order.id,
@@ -185,3 +190,21 @@ def get_checkout_capacity_limit(request):
             return max(1, min(requested_limit, max_limit))
 
     return settings.CHECKOUT_MAX_CONCURRENT_REQUESTS
+
+
+def fail_checkout_after_stock_if_requested(request):
+    if not is_checkout_failure_injection_enabled(request):
+        return
+
+    raise RuntimeError("Debug checkout failure injected after stock reduction.")
+
+
+def is_checkout_failure_injection_enabled(request):
+    if not (settings.DEBUG or getattr(settings, "TESTING", False)):
+        return False
+
+    raw_value = request.headers.get(DEBUG_FAIL_CHECKOUT_AFTER_STOCK_HEADER)
+    if raw_value is None:
+        raw_value = request.query_params.get(DEBUG_FAIL_CHECKOUT_AFTER_STOCK_QUERY_PARAM)
+
+    return str(raw_value).lower() in {"1", "true", "yes", "on"}
