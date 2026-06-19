@@ -1,0 +1,581 @@
+{
+  "api_base_url": "http://127.0.0.1:8000",
+  "product_id": 23,
+  "batch_run_id": 8,
+  "summary": {
+    "endpoint_count": 4,
+    "cache_header_success_count": 4,
+    "timing_improved_or_equal_count": 3,
+    "passed": true,
+    "timing_note": "Small local timing differences can be noisy; X-Cache proves cache behavior."
+  },
+  "endpoints": [
+    {
+      "name": "products_list",
+      "url": "http://127.0.0.1:8000/api/products/",
+      "first_request": {
+        "status": 200,
+        "x_cache": "MISS",
+        "duration_ms": 32.03,
+        "body": [
+          {
+            "id": 7,
+            "name": "Async Queue Test Product",
+            "description": "Temporary product used by scripts/async_queue_test.py.",
+            "price": "10.00",
+            "stock": 4,
+            "version": 11,
+            "created_at": "2026-05-17T21:47:35.513139Z",
+            "updated_at": "2026-05-18T11:46:37.381539Z"
+          },
+          {
+            "id": 17,
+            "name": "Batch Processing Test Product 1",
+            "description": "Temporary product used by scripts/batch_processing_test.py.",
+            "price": "10.00",
+            "stock": 9962,
+            "version": 2,
+            "created_at": "2026-05-18T08:47:00.574893Z",
+            "updated_at": "2026-05-18T11:01:45.242829Z"
+          },
+          {
+            "id": 20,
+            "name": "Batch Processing Test Product 1",
+            "description": "Temporary product used by scripts/batch_processing_test.py.",
+            "price": "10.00",
+            "stock": 10000,
+            "version": 1,
+            "created_at": "2026-05-18T11:48:51.469404Z",
+            "updated_at": "2026-05-18T11:48:51.469413Z"
+          },
+          {
+            "id": 21,
+            "name": "Batch Processing Test Product 2",
+            "description": "Temporary product used by scripts/batch_processing_test.py.",
+            "price": "15.50",
+            "stock": 10000,
+            "version": 1,
+            "created_at": "2026-05-18T11:48:51.470163Z",
+            "updated_at": "2026-05-18T11:48:51.470171Z"
+          },
+          {
+            "id": 22,
+            "name": "Batch Processing Test Product 3",
+            "description": "Temporary product used by scripts/batch_processing_test.py.",
+            "price": "20.00",
+            "stock": 10000,
+            "version": 1,
+            "created_at": "2026-05-18T11:48:51.470756Z",
+            "updated_at": "2026-05-18T11:48:51.470764Z"
+          },
+          {
+            "id": 23,
+            "name": "Cache Task 6 Product",
+            "description": "Temporary product used by scripts/cache_test.py.",
+            "price": "17.50",
+            "stock": 25,
+            "version": 1,
+            "created_at": "2026-06-19T18:18:08.001271Z",
+            "updated_at": "2026-06-19T18:20:34.007186Z"
+          },
+          {
+            "id": 4,
+            "name": "Celery Worker Bundle",
+            "description": "Demo product representing asynchronous background workers.",
+            "price": "89.00",
+            "stock": 100,
+            "version": 5,
+            "created_at": "2026-05-12T21:26:16.383010Z",
+            "updated_at": "2026-05-17T21:55:51.523999Z"
+          },
+          {
+            "id": 1,
+            "name": "Parallel Laptop",
+            "description": "Developer laptop used for backend load testing examples.",
+            "price": "1299.99",
+            "stock": 25,
+            "version": 2,
+            "created_at": "2026-05-12T21:26:16.366952Z",
+            "updated_at": "2026-05-17T21:55:51.517479Z"
+          },
+          {
+            "id": 3,
+            "name": "PostgreSQL Storage Pack",
+            "description": "Demo product representing durable relational storage.",
+            "price": "349.50",
+            "stock": 40,
+            "version": 2,
+            "created_at": "2026-05-12T21:26:16.378312Z",
+            "updated_at": "2026-05-17T21:55:51.522015Z"
+          },
+          {
+            "id": 5,
+            "name": "Race Condition Test Product",
+            "description": "Temporary product used by scripts/race_condition_test.py.",
+            "price": "10.00",
+            "stock": 0,
+            "version": 90,
+            "created_at": "2026-05-16T17:24:35.320609Z",
+            "updated_at": "2026-05-18T13:01:02.455979Z"
+          },
+          {
+            "id": 2,
+            "name": "Redis Cache Node",
+            "description": "Demo product representing a cache server.",
+            "price": "199.99",
+            "stock": 50,
+            "version": 2,
+            "created_at": "2026-05-12T21:26:16.373051Z",
+            "updated_at": "2026-05-17T21:55:51.520198Z"
+          },
+          {
+            "id": 6,
+            "name": "Resource Capacity Test Product",
+            "description": "Temporary product used by scripts/resource_capacity_test.py.",
+            "price": "10.00",
+            "stock": 92,
+            "version": 109,
+            "created_at": "2026-05-17T08:52:51.055926Z",
+            "updated_at": "2026-05-18T12:55:27.270880Z"
+          }
+        ]
+      },
+      "second_request": {
+        "status": 200,
+        "x_cache": "HIT",
+        "duration_ms": 21.82,
+        "body": [
+          {
+            "id": 7,
+            "name": "Async Queue Test Product",
+            "description": "Temporary product used by scripts/async_queue_test.py.",
+            "price": "10.00",
+            "stock": 4,
+            "version": 11,
+            "created_at": "2026-05-17T21:47:35.513139Z",
+            "updated_at": "2026-05-18T11:46:37.381539Z"
+          },
+          {
+            "id": 17,
+            "name": "Batch Processing Test Product 1",
+            "description": "Temporary product used by scripts/batch_processing_test.py.",
+            "price": "10.00",
+            "stock": 9962,
+            "version": 2,
+            "created_at": "2026-05-18T08:47:00.574893Z",
+            "updated_at": "2026-05-18T11:01:45.242829Z"
+          },
+          {
+            "id": 20,
+            "name": "Batch Processing Test Product 1",
+            "description": "Temporary product used by scripts/batch_processing_test.py.",
+            "price": "10.00",
+            "stock": 10000,
+            "version": 1,
+            "created_at": "2026-05-18T11:48:51.469404Z",
+            "updated_at": "2026-05-18T11:48:51.469413Z"
+          },
+          {
+            "id": 21,
+            "name": "Batch Processing Test Product 2",
+            "description": "Temporary product used by scripts/batch_processing_test.py.",
+            "price": "15.50",
+            "stock": 10000,
+            "version": 1,
+            "created_at": "2026-05-18T11:48:51.470163Z",
+            "updated_at": "2026-05-18T11:48:51.470171Z"
+          },
+          {
+            "id": 22,
+            "name": "Batch Processing Test Product 3",
+            "description": "Temporary product used by scripts/batch_processing_test.py.",
+            "price": "20.00",
+            "stock": 10000,
+            "version": 1,
+            "created_at": "2026-05-18T11:48:51.470756Z",
+            "updated_at": "2026-05-18T11:48:51.470764Z"
+          },
+          {
+            "id": 23,
+            "name": "Cache Task 6 Product",
+            "description": "Temporary product used by scripts/cache_test.py.",
+            "price": "17.50",
+            "stock": 25,
+            "version": 1,
+            "created_at": "2026-06-19T18:18:08.001271Z",
+            "updated_at": "2026-06-19T18:20:34.007186Z"
+          },
+          {
+            "id": 4,
+            "name": "Celery Worker Bundle",
+            "description": "Demo product representing asynchronous background workers.",
+            "price": "89.00",
+            "stock": 100,
+            "version": 5,
+            "created_at": "2026-05-12T21:26:16.383010Z",
+            "updated_at": "2026-05-17T21:55:51.523999Z"
+          },
+          {
+            "id": 1,
+            "name": "Parallel Laptop",
+            "description": "Developer laptop used for backend load testing examples.",
+            "price": "1299.99",
+            "stock": 25,
+            "version": 2,
+            "created_at": "2026-05-12T21:26:16.366952Z",
+            "updated_at": "2026-05-17T21:55:51.517479Z"
+          },
+          {
+            "id": 3,
+            "name": "PostgreSQL Storage Pack",
+            "description": "Demo product representing durable relational storage.",
+            "price": "349.50",
+            "stock": 40,
+            "version": 2,
+            "created_at": "2026-05-12T21:26:16.378312Z",
+            "updated_at": "2026-05-17T21:55:51.522015Z"
+          },
+          {
+            "id": 5,
+            "name": "Race Condition Test Product",
+            "description": "Temporary product used by scripts/race_condition_test.py.",
+            "price": "10.00",
+            "stock": 0,
+            "version": 90,
+            "created_at": "2026-05-16T17:24:35.320609Z",
+            "updated_at": "2026-05-18T13:01:02.455979Z"
+          },
+          {
+            "id": 2,
+            "name": "Redis Cache Node",
+            "description": "Demo product representing a cache server.",
+            "price": "199.99",
+            "stock": 50,
+            "version": 2,
+            "created_at": "2026-05-12T21:26:16.373051Z",
+            "updated_at": "2026-05-17T21:55:51.520198Z"
+          },
+          {
+            "id": 6,
+            "name": "Resource Capacity Test Product",
+            "description": "Temporary product used by scripts/resource_capacity_test.py.",
+            "price": "10.00",
+            "stock": 92,
+            "version": 109,
+            "created_at": "2026-05-17T08:52:51.055926Z",
+            "updated_at": "2026-05-18T12:55:27.270880Z"
+          }
+        ]
+      },
+      "expected_cache_headers": true,
+      "duration_delta_ms": 10.21,
+      "second_request_faster_or_equal": true
+    },
+    {
+      "name": "product_detail",
+      "url": "http://127.0.0.1:8000/api/products/23/",
+      "first_request": {
+        "status": 200,
+        "x_cache": "MISS",
+        "duration_ms": 34.35,
+        "body": {
+          "id": 23,
+          "name": "Cache Task 6 Product",
+          "description": "Temporary product used by scripts/cache_test.py.",
+          "price": "17.50",
+          "stock": 25,
+          "version": 1,
+          "created_at": "2026-06-19T18:18:08.001271Z",
+          "updated_at": "2026-06-19T18:20:34.007186Z"
+        }
+      },
+      "second_request": {
+        "status": 200,
+        "x_cache": "HIT",
+        "duration_ms": 27.13,
+        "body": {
+          "id": 23,
+          "name": "Cache Task 6 Product",
+          "description": "Temporary product used by scripts/cache_test.py.",
+          "price": "17.50",
+          "stock": 25,
+          "version": 1,
+          "created_at": "2026-06-19T18:18:08.001271Z",
+          "updated_at": "2026-06-19T18:20:34.007186Z"
+        }
+      },
+      "expected_cache_headers": true,
+      "duration_delta_ms": 7.22,
+      "second_request_faster_or_equal": true
+    },
+    {
+      "name": "daily_sales_reports_list",
+      "url": "http://127.0.0.1:8000/api/reports/daily-sales/",
+      "first_request": {
+        "status": 200,
+        "x_cache": "MISS",
+        "duration_ms": 29.26,
+        "body": [
+          {
+            "id": 6,
+            "date": "2026-05-18",
+            "total_orders": 0,
+            "total_order_items": 0,
+            "total_quantity_sold": 0,
+            "total_sales": "0.00",
+            "best_selling_product": null,
+            "best_selling_product_detail": null,
+            "created_at": "2026-05-18T08:44:53.682620Z",
+            "updated_at": "2026-05-18T08:44:53.682638Z"
+          },
+          {
+            "id": 2,
+            "date": "2026-05-17",
+            "total_orders": 9,
+            "total_order_items": 0,
+            "total_quantity_sold": 0,
+            "total_sales": "150.00",
+            "best_selling_product": 6,
+            "best_selling_product_detail": {
+              "id": 6,
+              "name": "Resource Capacity Test Product",
+              "description": "Temporary product used by scripts/resource_capacity_test.py.",
+              "price": "10.00",
+              "stock": 92,
+              "version": 109,
+              "created_at": "2026-05-17T08:52:51.055926Z",
+              "updated_at": "2026-05-18T12:55:27.270880Z"
+            },
+            "created_at": "2026-05-17T21:54:52.791877Z",
+            "updated_at": "2026-05-18T08:39:59.870895Z"
+          },
+          {
+            "id": 1,
+            "date": "2026-05-12",
+            "total_orders": 0,
+            "total_order_items": 0,
+            "total_quantity_sold": 0,
+            "total_sales": "0.00",
+            "best_selling_product": null,
+            "best_selling_product_detail": null,
+            "created_at": "2026-05-12T21:49:00.265171Z",
+            "updated_at": "2026-05-18T08:39:59.870895Z"
+          },
+          {
+            "id": 9,
+            "date": "2001-06-19",
+            "total_orders": 3,
+            "total_order_items": 3,
+            "total_quantity_sold": 6,
+            "total_sales": "105.00",
+            "best_selling_product": 23,
+            "best_selling_product_detail": {
+              "id": 23,
+              "name": "Cache Task 6 Product",
+              "description": "Temporary product used by scripts/cache_test.py.",
+              "price": "17.50",
+              "stock": 25,
+              "version": 1,
+              "created_at": "2026-06-19T18:18:08.001271Z",
+              "updated_at": "2026-06-19T18:20:34.007186Z"
+            },
+            "created_at": "2026-06-19T18:18:08.017337Z",
+            "updated_at": "2026-06-19T18:20:34.007186Z"
+          },
+          {
+            "id": 8,
+            "date": "2001-01-15",
+            "total_orders": 250,
+            "total_order_items": 250,
+            "total_quantity_sold": 750,
+            "total_sales": "11355.00",
+            "best_selling_product": 20,
+            "best_selling_product_detail": {
+              "id": 20,
+              "name": "Batch Processing Test Product 1",
+              "description": "Temporary product used by scripts/batch_processing_test.py.",
+              "price": "10.00",
+              "stock": 10000,
+              "version": 1,
+              "created_at": "2026-05-18T11:48:51.469404Z",
+              "updated_at": "2026-05-18T11:48:51.469413Z"
+            },
+            "created_at": "2026-05-18T11:48:52.066064Z",
+            "updated_at": "2026-05-18T11:48:52.066075Z"
+          }
+        ]
+      },
+      "second_request": {
+        "status": 200,
+        "x_cache": "HIT",
+        "duration_ms": 23.34,
+        "body": [
+          {
+            "id": 6,
+            "date": "2026-05-18",
+            "total_orders": 0,
+            "total_order_items": 0,
+            "total_quantity_sold": 0,
+            "total_sales": "0.00",
+            "best_selling_product": null,
+            "best_selling_product_detail": null,
+            "created_at": "2026-05-18T08:44:53.682620Z",
+            "updated_at": "2026-05-18T08:44:53.682638Z"
+          },
+          {
+            "id": 2,
+            "date": "2026-05-17",
+            "total_orders": 9,
+            "total_order_items": 0,
+            "total_quantity_sold": 0,
+            "total_sales": "150.00",
+            "best_selling_product": 6,
+            "best_selling_product_detail": {
+              "id": 6,
+              "name": "Resource Capacity Test Product",
+              "description": "Temporary product used by scripts/resource_capacity_test.py.",
+              "price": "10.00",
+              "stock": 92,
+              "version": 109,
+              "created_at": "2026-05-17T08:52:51.055926Z",
+              "updated_at": "2026-05-18T12:55:27.270880Z"
+            },
+            "created_at": "2026-05-17T21:54:52.791877Z",
+            "updated_at": "2026-05-18T08:39:59.870895Z"
+          },
+          {
+            "id": 1,
+            "date": "2026-05-12",
+            "total_orders": 0,
+            "total_order_items": 0,
+            "total_quantity_sold": 0,
+            "total_sales": "0.00",
+            "best_selling_product": null,
+            "best_selling_product_detail": null,
+            "created_at": "2026-05-12T21:49:00.265171Z",
+            "updated_at": "2026-05-18T08:39:59.870895Z"
+          },
+          {
+            "id": 9,
+            "date": "2001-06-19",
+            "total_orders": 3,
+            "total_order_items": 3,
+            "total_quantity_sold": 6,
+            "total_sales": "105.00",
+            "best_selling_product": 23,
+            "best_selling_product_detail": {
+              "id": 23,
+              "name": "Cache Task 6 Product",
+              "description": "Temporary product used by scripts/cache_test.py.",
+              "price": "17.50",
+              "stock": 25,
+              "version": 1,
+              "created_at": "2026-06-19T18:18:08.001271Z",
+              "updated_at": "2026-06-19T18:20:34.007186Z"
+            },
+            "created_at": "2026-06-19T18:18:08.017337Z",
+            "updated_at": "2026-06-19T18:20:34.007186Z"
+          },
+          {
+            "id": 8,
+            "date": "2001-01-15",
+            "total_orders": 250,
+            "total_order_items": 250,
+            "total_quantity_sold": 750,
+            "total_sales": "11355.00",
+            "best_selling_product": 20,
+            "best_selling_product_detail": {
+              "id": 20,
+              "name": "Batch Processing Test Product 1",
+              "description": "Temporary product used by scripts/batch_processing_test.py.",
+              "price": "10.00",
+              "stock": 10000,
+              "version": 1,
+              "created_at": "2026-05-18T11:48:51.469404Z",
+              "updated_at": "2026-05-18T11:48:51.469413Z"
+            },
+            "created_at": "2026-05-18T11:48:52.066064Z",
+            "updated_at": "2026-05-18T11:48:52.066075Z"
+          }
+        ]
+      },
+      "expected_cache_headers": true,
+      "duration_delta_ms": 5.92,
+      "second_request_faster_or_equal": true
+    },
+    {
+      "name": "daily_sales_batch_run_detail",
+      "url": "http://127.0.0.1:8000/api/reports/daily-sales/batch-runs/8/",
+      "first_request": {
+        "status": 200,
+        "x_cache": "MISS",
+        "duration_ms": 30.66,
+        "body": {
+          "id": 8,
+          "report_date": "2001-06-19",
+          "status": "success",
+          "celery_task_id": null,
+          "chunk_size": 2,
+          "chunks_processed": 2,
+          "total_orders": 3,
+          "total_order_items": 3,
+          "total_quantity_sold": 6,
+          "total_sales": "105.00",
+          "started_at": null,
+          "finished_at": null,
+          "duration_ms": null,
+          "metadata": {
+            "chunks": [
+              {
+                "chunk_number": 1
+              },
+              {
+                "chunk_number": 2
+              }
+            ],
+            "algorithm": "cache_task6_demo"
+          },
+          "error_message": "",
+          "report": 9
+        }
+      },
+      "second_request": {
+        "status": 200,
+        "x_cache": "HIT",
+        "duration_ms": 34.62,
+        "body": {
+          "id": 8,
+          "report_date": "2001-06-19",
+          "status": "success",
+          "celery_task_id": null,
+          "chunk_size": 2,
+          "chunks_processed": 2,
+          "total_orders": 3,
+          "total_order_items": 3,
+          "total_quantity_sold": 6,
+          "total_sales": "105.00",
+          "started_at": null,
+          "finished_at": null,
+          "duration_ms": null,
+          "metadata": {
+            "chunks": [
+              {
+                "chunk_number": 1
+              },
+              {
+                "chunk_number": 2
+              }
+            ],
+            "algorithm": "cache_task6_demo"
+          },
+          "error_message": "",
+          "report": 9
+        }
+      },
+      "expected_cache_headers": true,
+      "duration_delta_ms": -3.96,
+      "second_request_faster_or_equal": false
+    }
+  ],
+  "created_at": "2026-06-19T21:20:35"
+}

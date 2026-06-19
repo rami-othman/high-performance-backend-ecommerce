@@ -14,6 +14,7 @@ from rest_framework.views import APIView
 from cart.models import Cart
 from payments.models import Payment
 from performance.capacity_limiter import CheckoutCapacityLimiter, CheckoutCapacityUnavailable
+from products.cache_utils import invalidate_checkout_related_caches
 from products.models import Product
 from .models import Order, OrderBackgroundTask, OrderItem
 from .serializers import OrderSerializer
@@ -22,7 +23,7 @@ from .tasks import generate_invoice_task, send_order_notification_task
 
 RACE_CONDITION_TEST_CAPACITY_LIMIT_HEADER = "X-Race-Condition-Test-Capacity-Limit"
 
-redis_client = redis.Redis(host='redis', port=6379, db=0)
+redis_client = redis.Redis.from_url(settings.REDIS_URL)
 
 
 def dispatch_order_tasks(order_id):
@@ -123,9 +124,22 @@ class CheckoutView(APIView):
 
                 cart.items.all().delete()
 
+                changed_product_ids = list(product_ids)
+                transaction.on_commit(
+                    lambda product_ids=changed_product_ids: invalidate_checkout_related_caches(product_ids)
+                )
                 transaction.on_commit(lambda: dispatch_order_tasks(order.id))
 
-        return Response({"order_id": order.id})
+        return Response(
+            {
+                "order_id": order.id,
+                "total_price": str(total_price),
+                "status": order.status,
+                "message": "Checkout completed successfully.",
+                "background_tasks_dispatched": True,
+            },
+            status=status.HTTP_201_CREATED,
+        )
 
 
 class OrderListView(APIView):
@@ -152,4 +166,14 @@ def apply_capacity_test_delay(request):
 
 
 def get_checkout_capacity_limit(request):
+    if settings.DEBUG and getattr(settings, "CHECKOUT_CAPACITY_TEST_LIMIT_OVERRIDE_ENABLED", False):
+        raw_limit = request.headers.get(RACE_CONDITION_TEST_CAPACITY_LIMIT_HEADER)
+        if raw_limit:
+            try:
+                requested_limit = int(raw_limit)
+            except (TypeError, ValueError):
+                return settings.CHECKOUT_MAX_CONCURRENT_REQUESTS
+            max_limit = getattr(settings, "CHECKOUT_CAPACITY_TEST_LIMIT_MAX", 1000)
+            return max(1, min(requested_limit, max_limit))
+
     return settings.CHECKOUT_MAX_CONCURRENT_REQUESTS

@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.core.cache import cache
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import status
@@ -6,6 +7,16 @@ from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from products.cache_utils import (
+    CACHE_HIT,
+    CACHE_MISS,
+    DAILY_SALES_BATCH_RUN_DETAIL_CACHE_TIMEOUT_SECONDS,
+    DAILY_SALES_REPORTS_LIST_CACHE_KEY,
+    DAILY_SALES_REPORTS_LIST_CACHE_TIMEOUT_SECONDS,
+    daily_sales_batch_run_detail_cache_key,
+    remember_daily_sales_batch_run_cache,
+    set_cache_header,
+)
 from .models import DailySalesBatchRun, DailySalesReport
 from .serializers import (
     DailySalesBatchRequestSerializer,
@@ -59,9 +70,18 @@ class DailySalesReportListView(APIView):
     throttle_scope = "reports"
 
     def get(self, request):
+        cached_data = cache.get(DAILY_SALES_REPORTS_LIST_CACHE_KEY)
+        if cached_data is not None:
+            return set_cache_header(Response(cached_data), CACHE_HIT)
+
         reports = DailySalesReport.objects.select_related("best_selling_product")
         serializer = DailySalesReportSerializer(reports, many=True)
-        return Response(serializer.data)
+        cache.set(
+            DAILY_SALES_REPORTS_LIST_CACHE_KEY,
+            serializer.data,
+            timeout=DAILY_SALES_REPORTS_LIST_CACHE_TIMEOUT_SECONDS,
+        )
+        return set_cache_header(Response(serializer.data), CACHE_MISS)
 
 
 class DailySalesBatchRunDetailView(APIView):
@@ -69,6 +89,13 @@ class DailySalesBatchRunDetailView(APIView):
     throttle_scope = "reports"
 
     def get(self, request, batch_run_id):
+        cache_key = daily_sales_batch_run_detail_cache_key(batch_run_id)
+        cached_data = cache.get(cache_key)
+        if cached_data is not None:
+            return set_cache_header(Response(cached_data), CACHE_HIT)
+
         batch_run = get_object_or_404(DailySalesBatchRun.objects.select_related("report"), id=batch_run_id)
         serializer = DailySalesBatchRunSerializer(batch_run)
-        return Response(serializer.data)
+        cache.set(cache_key, serializer.data, timeout=DAILY_SALES_BATCH_RUN_DETAIL_CACHE_TIMEOUT_SECONDS)
+        remember_daily_sales_batch_run_cache(batch_run_id)
+        return set_cache_header(Response(serializer.data), CACHE_MISS)

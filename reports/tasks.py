@@ -8,6 +8,7 @@ from django.db.models import Count, Sum
 from django.utils import timezone
 
 from orders.models import Order, OrderItem
+from products.cache_utils import invalidate_daily_sales_report_caches
 from .models import DailySalesBatchRun, DailySalesReport
 
 
@@ -204,6 +205,7 @@ def process_daily_sales_report_task(self, report_date=None, batch_run_id=None, c
                 "updated_at",
             ]
         )
+        invalidate_daily_sales_report_caches()
 
         return {
             "status": DailySalesBatchRun.Status.SUCCESS,
@@ -233,4 +235,5 @@ def process_daily_sales_report_task(self, report_date=None, batch_run_id=None, c
                     "updated_at",
                 ]
             )
+            invalidate_daily_sales_report_caches()
         raise

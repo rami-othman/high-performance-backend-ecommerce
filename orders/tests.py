@@ -2,6 +2,7 @@ from decimal import Decimal
 from types import SimpleNamespace
 from unittest.mock import patch
 
+from django.core.cache import cache
 from django.contrib.auth import get_user_model
 from django.test import TestCase, override_settings
 from django.urls import reverse
@@ -10,7 +11,15 @@ from rest_framework.test import APIClient
 
 from cart.models import Cart, CartItem
 from payments.models import Payment
+from products.cache_utils import (
+    DAILY_SALES_REPORTS_LIST_CACHE_KEY,
+    PRODUCT_LIST_CACHE_KEY,
+    daily_sales_batch_run_detail_cache_key,
+    product_detail_cache_key,
+    remember_daily_sales_batch_run_cache,
+)
 from products.models import Product
+from reports.models import DailySalesBatchRun
 from .models import Order, OrderBackgroundTask
 
 
@@ -24,17 +33,37 @@ class TestCheckoutCapacityLimiter:
         return False
 
 
+class TestRedisLock:
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc, traceback):
+        return False
+
+
+class TestRedisClient:
+    def lock(self, *args, **kwargs):
+        return TestRedisLock()
+
+
 @override_settings(
     CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}},
 )
 class CheckoutTests(TestCase):
     def setUp(self):
+        cache.clear()
         self.user = get_user_model().objects.create_user(
             username="checkout-user",
             password="strong-password",
         )
         self.client = APIClient()
         self.client.force_authenticate(user=self.user)
+        self.redis_client_patcher = patch("orders.views.redis_client", TestRedisClient())
+        self.redis_client_patcher.start()
+        self.addCleanup(self.redis_client_patcher.stop)
+
+    def tearDown(self):
+        cache.clear()
 
     def test_checkout_creates_order_updates_stock_clears_cart_and_creates_payment(self):
         product = Product.objects.create(
@@ -62,6 +91,39 @@ class CheckoutTests(TestCase):
         self.assertEqual(product.stock, 8)
         self.assertEqual(cart.items.count(), 0)
         self.assertTrue(Payment.objects.filter(order=order, status=Payment.Status.COMPLETED).exists())
+
+    def test_checkout_invalidates_product_and_report_caches_after_stock_changes(self):
+        product = Product.objects.create(
+            name="Cache Invalidated Product",
+            price=Decimal("8.00"),
+            stock=4,
+        )
+        batch_run = DailySalesBatchRun.objects.create(report_date="2026-06-19", chunk_size=10)
+        cart = Cart.objects.create(user=self.user)
+        CartItem.objects.create(cart=cart, product=product, quantity=1)
+
+        cache.set(PRODUCT_LIST_CACHE_KEY, [{"id": product.id, "stock": product.stock}])
+        cache.set(product_detail_cache_key(product.id), {"id": product.id, "stock": product.stock})
+        cache.set(DAILY_SALES_REPORTS_LIST_CACHE_KEY, [{"date": "2026-06-19"}])
+        cache.set(daily_sales_batch_run_detail_cache_key(batch_run.id), {"id": batch_run.id})
+        remember_daily_sales_batch_run_cache(batch_run.id)
+
+        with (
+            patch("orders.views.CheckoutCapacityLimiter", return_value=TestCheckoutCapacityLimiter()),
+            patch("orders.views.generate_invoice_task.delay", return_value=SimpleNamespace(id="invoice-task-id")),
+            patch(
+                "orders.views.send_order_notification_task.delay",
+                return_value=SimpleNamespace(id="notification-task-id"),
+            ),
+            self.captureOnCommitCallbacks(execute=True),
+        ):
+            response = self.client.post(reverse("checkout"))
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertIsNone(cache.get(PRODUCT_LIST_CACHE_KEY))
+        self.assertIsNone(cache.get(product_detail_cache_key(product.id)))
+        self.assertIsNone(cache.get(DAILY_SALES_REPORTS_LIST_CACHE_KEY))
+        self.assertIsNone(cache.get(daily_sales_batch_run_detail_cache_key(batch_run.id)))
 
     def test_checkout_registers_background_tasks_after_commit(self):
         product = Product.objects.create(

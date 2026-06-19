@@ -2,9 +2,13 @@ from datetime import datetime, time, timedelta
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 from django.test import TestCase, override_settings
+from django.urls import reverse
 from django.utils import timezone
 from rest_framework import serializers
+from rest_framework import status
+from rest_framework.test import APIClient
 
 from orders.models import Order, OrderItem
 from products.models import Product
@@ -19,10 +23,18 @@ from .tasks import process_daily_sales_report_task
 )
 class DailySalesBatchProcessingTests(TestCase):
     def setUp(self):
+        cache.clear()
         self.user = get_user_model().objects.create_user(
             username="batch-report-user",
             password="strong-password",
         )
+        self.admin_user = get_user_model().objects.create_user(
+            username="batch-report-admin",
+            password="strong-password",
+            is_staff=True,
+        )
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.admin_user)
         self.product_a = Product.objects.create(
             name="Batch Report Product A",
             price=Decimal("10.00"),
@@ -34,6 +46,9 @@ class DailySalesBatchProcessingTests(TestCase):
             stock=100,
         )
         self.report_date = timezone.localdate() - timedelta(days=3)
+
+    def tearDown(self):
+        cache.clear()
 
     def create_paid_order(self, product, quantity, unit_price):
         order = Order.objects.create(
@@ -123,3 +138,40 @@ class DailySalesBatchProcessingTests(TestCase):
     def test_batch_task_rejects_invalid_chunk_size(self):
         with self.assertRaises(serializers.ValidationError):
             DailySalesBatchRequestSerializer(data={"chunk_size": 0}).is_valid(raise_exception=True)
+
+    def test_daily_sales_report_list_marks_first_response_miss_then_hit(self):
+        DailySalesReport.objects.create(
+            date=self.report_date,
+            total_orders=1,
+            total_order_items=1,
+            total_quantity_sold=2,
+            total_sales=Decimal("20.00"),
+            best_selling_product=self.product_a,
+        )
+        url = reverse("daily-sales-list")
+
+        first_response = self.client.get(url)
+        second_response = self.client.get(url)
+
+        self.assertEqual(first_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(second_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(first_response["X-Cache"], "MISS")
+        self.assertEqual(second_response["X-Cache"], "HIT")
+        self.assertEqual(first_response.data, second_response.data)
+
+    def test_daily_sales_batch_run_detail_marks_first_response_miss_then_hit(self):
+        batch_run = DailySalesBatchRun.objects.create(
+            report_date=self.report_date,
+            chunk_size=2,
+            metadata={"chunks": [], "algorithm": "keyset_pagination_by_order_id"},
+        )
+        url = reverse("daily-sales-batch-run-detail", args=[batch_run.id])
+
+        first_response = self.client.get(url)
+        second_response = self.client.get(url)
+
+        self.assertEqual(first_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(second_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(first_response["X-Cache"], "MISS")
+        self.assertEqual(second_response["X-Cache"], "HIT")
+        self.assertEqual(first_response.data, second_response.data)
