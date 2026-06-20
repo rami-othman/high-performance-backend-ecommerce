@@ -2,12 +2,12 @@
 
 ## 1. Cover Page
 
-**Project Title:** High-Performance E-Commerce Backend Engine  
-**Course Area:** Parallel Programming  
-**Project Type:** University Backend Performance Project  
-**System Type:** Monolithic Django E-Commerce Backend  
-**Implemented Report Scope:** Tasks 1-5 only  
-**Main Technologies:** Python 3.11, Django, Django REST Framework, PostgreSQL, Redis, Celery, HAProxy, Docker Compose  
+**Project Title:** High-Performance E-Commerce Backend Engine
+**Course Area:** Parallel Programming
+**Project Type:** University Backend Performance Project
+**System Type:** Monolithic Django E-Commerce Backend
+**Implemented Report Scope:** Tasks 1-5 only
+**Main Technologies:** Python 3.11, Django, Django REST Framework, PostgreSQL, Redis, Celery, HAProxy, Docker Compose
 **Report Basis:** Actual source code, project documentation, Docker configuration, HAProxy configuration, proof scripts, and latest JSON result files under `results/`.
 
 ## 2. Abstract
@@ -20,15 +20,15 @@ The system uses PostgreSQL for durable relational data, Redis for shared coordin
 
 The project implements an e-commerce backend with products, carts, checkout, orders, payments, reports, JWT authentication, performance monitoring, and simple UI pages. The project is intentionally a monolithic Django system, not a microservices system. Domain separation is achieved through Django apps:
 
-| App | Responsibility |
-| --- | --- |
-| `config` | Django settings, URL routing, JWT auth URLs, Celery setup |
-| `products` | Product catalog, price, stock, version field |
-| `cart` | User cart and cart items |
-| `orders` | Checkout, order records, order items, background task proof rows |
-| `payments` | Payment records created during checkout |
-| `reports` | Daily sales reports and batch processing proof rows |
-| `performance` | Request timing logs, capacity metrics, health, server identity |
+| App             | Responsibility                                                   |
+| --------------- | ---------------------------------------------------------------- |
+| `config`      | Django settings, URL routing, JWT auth URLs, Celery setup        |
+| `products`    | Product catalog, price, stock, version field                     |
+| `cart`        | User cart and cart items                                         |
+| `orders`      | Checkout, order records, order items, background task proof rows |
+| `payments`    | Payment records created during checkout                          |
+| `reports`     | Daily sales reports and batch processing proof rows              |
+| `performance` | Request timing logs, capacity metrics, health, server identity   |
 
 The first five tasks focus on correctness and measurable non-functional behavior under concurrent and distributed execution conditions.
 
@@ -46,19 +46,19 @@ The project also aims to keep core business behavior deterministic, use real pro
 
 ## 5. Technology Stack
 
-| Layer | Technology |
-| --- | --- |
-| Programming language | Python 3.11 |
-| Backend framework | Django |
-| API framework | Django REST Framework |
-| Authentication | SimpleJWT and Django default `auth.User` |
-| Database | PostgreSQL |
-| Shared coordination / broker | Redis |
-| Async processing | Celery |
-| Load balancing | HAProxy |
-| API documentation | drf-spectacular Swagger/OpenAPI |
-| Deployment simulation | Docker Compose |
-| UI | Django templates, Bootstrap CDN, vanilla JavaScript |
+| Layer                        | Technology                                          |
+| ---------------------------- | --------------------------------------------------- |
+| Programming language         | Python 3.11                                         |
+| Backend framework            | Django                                              |
+| API framework                | Django REST Framework                               |
+| Authentication               | SimpleJWT and Django default `auth.User`          |
+| Database                     | PostgreSQL                                          |
+| Shared coordination / broker | Redis                                               |
+| Async processing             | Celery                                              |
+| Load balancing               | HAProxy                                             |
+| API documentation            | drf-spectacular Swagger/OpenAPI                     |
+| Deployment simulation        | Docker Compose                                      |
+| UI                           | Django templates, Bootstrap CDN, vanilla JavaScript |
 
 ## 6. System Architecture
 
@@ -91,18 +91,18 @@ Key infrastructure files:
 
 The database stores the e-commerce state and the technical proof records used by the project.
 
-| Table | Purpose |
-| --- | --- |
-| `products_product` | Product catalog with `price`, `stock`, and `version` |
-| `cart_cart` | One cart per user |
-| `cart_cartitem` | Products and quantities selected by a user |
-| `orders_order` | Order header with user, total price, status, timestamps |
-| `orders_orderitem` | Immutable checkout line items |
-| `orders_orderbackgroundtask` | Persistent Celery task lifecycle proof rows |
-| `payments_payment` | One payment record per order |
-| `reports_dailysalesreport` | Final daily aggregate sales report |
-| `reports_dailysalesbatchrun` | Technical proof for chunked batch execution |
-| `performance_performancelog` | Request timing logs written by middleware |
+| Table                          | Purpose                                                    |
+| ------------------------------ | ---------------------------------------------------------- |
+| `products_product`           | Product catalog with `price`, `stock`, and `version` |
+| `cart_cart`                  | One cart per user                                          |
+| `cart_cartitem`              | Products and quantities selected by a user                 |
+| `orders_order`               | Order header with user, total price, status, timestamps    |
+| `orders_orderitem`           | Immutable checkout line items                              |
+| `orders_orderbackgroundtask` | Persistent Celery task lifecycle proof rows                |
+| `payments_payment`           | One payment record per order                               |
+| `reports_dailysalesreport`   | Final daily aggregate sales report                         |
+| `reports_dailysalesbatchrun` | Technical proof for chunked batch execution                |
+| `performance_performancelog` | Request timing logs written by middleware                  |
 
 The most important shared mutable data is `products_product.stock`. Task 1 protects this value with PostgreSQL row-level locking inside a transaction.
 
@@ -110,30 +110,30 @@ The most important shared mutable data is `products_product.stock`. Task 1 prote
 
 The API is REST-oriented and uses JWT for authenticated business operations.
 
-| Method | Endpoint | Purpose |
-| --- | --- | --- |
-| `POST` | `/api/auth/register/` | Register a user and return JWT tokens |
-| `POST` | `/api/auth/token/` | Login and return JWT tokens |
-| `POST` | `/api/auth/token/refresh/` | Refresh access token |
-| `GET` | `/api/auth/me/` | Return current authenticated user |
-| `GET` | `/api/products/` | List products |
-| `GET` | `/api/products/{id}/` | Product detail |
-| `GET` | `/api/cart/` | Current user's cart |
-| `POST` | `/api/cart/items/` | Add item to cart |
-| `PATCH` | `/api/cart/items/{id}/` | Update cart item |
-| `DELETE` | `/api/cart/items/{id}/` | Delete cart item |
-| `POST` | `/api/orders/checkout/` | Transactional checkout |
-| `GET` | `/api/orders/` | Current user's orders |
-| `GET` | `/api/orders/{id}/` | Current user's order detail |
-| `POST` | `/api/reports/daily-sales/run/` | Queue daily sales batch processing |
-| `GET` | `/api/reports/daily-sales/batch-runs/{id}/` | Inspect one batch run |
-| `GET` | `/api/reports/daily-sales/` | List daily sales reports |
-| `GET` | `/api/performance/logs/` | Admin performance logs |
-| `GET` | `/api/performance/capacity/` | Admin checkout capacity metrics |
-| `GET` | `/api/health/` | Health check |
-| `GET` | `/api/server-info/` | Backend server identity |
-| `GET` | `/api/schema/` | OpenAPI schema |
-| `GET` | `/api/docs/` | Swagger UI |
+| Method     | Endpoint                                      | Purpose                               |
+| ---------- | --------------------------------------------- | ------------------------------------- |
+| `POST`   | `/api/auth/register/`                       | Register a user and return JWT tokens |
+| `POST`   | `/api/auth/token/`                          | Login and return JWT tokens           |
+| `POST`   | `/api/auth/token/refresh/`                  | Refresh access token                  |
+| `GET`    | `/api/auth/me/`                             | Return current authenticated user     |
+| `GET`    | `/api/products/`                            | List products                         |
+| `GET`    | `/api/products/{id}/`                       | Product detail                        |
+| `GET`    | `/api/cart/`                                | Current user's cart                   |
+| `POST`   | `/api/cart/items/`                          | Add item to cart                      |
+| `PATCH`  | `/api/cart/items/{id}/`                     | Update cart item                      |
+| `DELETE` | `/api/cart/items/{id}/`                     | Delete cart item                      |
+| `POST`   | `/api/orders/checkout/`                     | Transactional checkout                |
+| `GET`    | `/api/orders/`                              | Current user's orders                 |
+| `GET`    | `/api/orders/{id}/`                         | Current user's order detail           |
+| `POST`   | `/api/reports/daily-sales/run/`             | Queue daily sales batch processing    |
+| `GET`    | `/api/reports/daily-sales/batch-runs/{id}/` | Inspect one batch run                 |
+| `GET`    | `/api/reports/daily-sales/`                 | List daily sales reports              |
+| `GET`    | `/api/performance/logs/`                    | Admin performance logs                |
+| `GET`    | `/api/performance/capacity/`                | Admin checkout capacity metrics       |
+| `GET`    | `/api/health/`                              | Health check                          |
+| `GET`    | `/api/server-info/`                         | Backend server identity               |
+| `GET`    | `/api/schema/`                              | OpenAPI schema                        |
+| `GET`    | `/api/docs/`                                | Swagger UI                            |
 
 ## 9. AOP / Performance Monitoring
 
@@ -160,13 +160,13 @@ This implementation matches the AOP concept because performance logging is separ
 
 ## Lecture Mapping Table
 
-| Project Task | Lecture Session |
-| --- | --- |
-| Task 1 | Session 1 Concurrent Access & Thread Safety |
-| Task 2 | Session 2 Thread Management / Resource Control |
-| Task 3 | Session 3 Messaging Queues & Asynchronous Processing |
-| Task 4 | Session 4 Batch Processing in Parallel Environments |
-| Task 5 | Session 5 Load Balancing & Scaling Strategies |
+| Project Task | Lecture Session                                      |
+| ------------ | ---------------------------------------------------- |
+| Task 1       | Session 1 Concurrent Access & Thread Safety          |
+| Task 2       | Session 2 Thread Management / Resource Control       |
+| Task 3       | Session 3 Messaging Queues & Asynchronous Processing |
+| Task 4       | Session 4 Batch Processing in Parallel Environments  |
+| Task 5       | Session 5 Load Balancing & Scaling Strategies        |
 
 ## 10. Task 1: Concurrent Access & Race Condition Protection
 
@@ -192,27 +192,27 @@ This implementation matches the AOP concept because performance logging is separ
 
 **Latest proof result:** `results/race_condition/race_condition_task1_latest.json`, created at `2026-05-18T15:54:07`.
 
-| Metric | Actual latest value |
-| --- | ---: |
-| Initial stock | 5 |
-| Concurrent users | 20 |
-| Quantity per user | 1 |
-| Expected successful checkouts | 5 |
-| Actual successful checkouts | 5 |
-| Expected failed checkouts | 15 |
-| Actual failed checkouts | 15 |
-| Insufficient stock failures | 15 |
-| Capacity rejections | 0 |
-| Server errors | 0 |
-| Status code counts | `201: 5`, `400: 15` |
-| Error code counts | `insufficient_stock: 15` |
-| Final stock | 0 |
-| Successful order count | 5 |
-| Total sold quantity | 5 |
-| Payment count | 5 |
-| Negative stock | false |
-| Overselling | false |
-| Passed | true |
+| Metric                        |        Actual latest value |
+| ----------------------------- | -------------------------: |
+| Initial stock                 |                          5 |
+| Concurrent users              |                         20 |
+| Quantity per user             |                          1 |
+| Expected successful checkouts |                          5 |
+| Actual successful checkouts   |                          5 |
+| Expected failed checkouts     |                         15 |
+| Actual failed checkouts       |                         15 |
+| Insufficient stock failures   |                         15 |
+| Capacity rejections           |                          0 |
+| Server errors                 |                          0 |
+| Status code counts            |    `201: 5`, `400: 15` |
+| Error code counts             | `insufficient_stock: 15` |
+| Final stock                   |                          0 |
+| Successful order count        |                          5 |
+| Total sold quantity           |                          5 |
+| Payment count                 |                          5 |
+| Negative stock                |                      false |
+| Overselling                   |                      false |
+| Passed                        |                       true |
 
 **Conclusion:** Task 1 passed. The result proves that concurrent checkout did not produce negative stock or overselling. The 15 failed requests failed because stock was exhausted, and 0 requests failed because of `checkout_capacity_exceeded`.
 
@@ -239,24 +239,24 @@ This implementation matches the AOP concept because performance logging is separ
 
 **Latest proof result:** `results/resource_capacity/resource_capacity_task2_latest.json`, created at `2026-05-18T15:55:27`.
 
-| Metric | Actual latest value |
-| --- | ---: |
-| Configured checkout limit | 6 |
-| Concurrent users | 20 |
-| Initial stock | 100 |
-| Quantity per user | 1 |
-| Successful checkouts | 8 |
-| Capacity rejected count | 12 |
-| Other failed requests | 0 |
-| Server errors | 0 |
-| Final stock | 92 |
-| Total sold quantity | 8 |
-| Successful order count | 8 |
-| Payment count | 8 |
-| Max observed active checkouts | 6 |
-| Limit respected | true |
-| Concurrent overlap observed | true |
-| Passed | true |
+| Metric                        | Actual latest value |
+| ----------------------------- | ------------------: |
+| Configured checkout limit     |                   6 |
+| Concurrent users              |                  20 |
+| Initial stock                 |                 100 |
+| Quantity per user             |                   1 |
+| Successful checkouts          |                   8 |
+| Capacity rejected count       |                  12 |
+| Other failed requests         |                   0 |
+| Server errors                 |                   0 |
+| Final stock                   |                  92 |
+| Total sold quantity           |                   8 |
+| Successful order count        |                   8 |
+| Payment count                 |                   8 |
+| Max observed active checkouts |                   6 |
+| Limit respected               |                true |
+| Concurrent overlap observed   |                true |
+| Passed                        |                true |
 
 **Conclusion:** Task 2 passed. The Redis limiter respected the configured limit, observed real overlap, rejected overload cleanly, and produced no server errors.
 
@@ -284,23 +284,23 @@ This implementation matches the AOP concept because performance logging is separ
 
 **Latest proof result:** `results/async_queues/async_queue_task3_latest.json`, created at `2026-05-18T11:46:38`.
 
-| Metric | Actual latest value |
-| --- | ---: |
-| Checkout status | 201 |
-| Checkout duration | 77.18 ms |
-| Background task count | 2 |
-| Successful background task count | 2 |
-| Failed background task count | 0 |
-| Total background duration | 2054 ms |
-| Celery task IDs present | true |
-| Task timestamps present | true |
-| Checkout returned before tasks finished | true |
-| Checkout faster than background work | true |
-| Order exists | true |
-| Payment exists | true |
-| Stock reduced | true |
-| Server error | false |
-| Passed | true |
+| Metric                                  | Actual latest value |
+| --------------------------------------- | ------------------: |
+| Checkout status                         |                 201 |
+| Checkout duration                       |            77.18 ms |
+| Background task count                   |                   2 |
+| Successful background task count        |                   2 |
+| Failed background task count            |                   0 |
+| Total background duration               |             2054 ms |
+| Celery task IDs present                 |                true |
+| Task timestamps present                 |                true |
+| Checkout returned before tasks finished |                true |
+| Checkout faster than background work    |                true |
+| Order exists                            |                true |
+| Payment exists                          |                true |
+| Stock reduced                           |                true |
+| Server error                            |               false |
+| Passed                                  |                true |
 
 Background task names:
 
@@ -333,27 +333,27 @@ Background task names:
 
 **Latest proof result:** `results/batch_processing/batch_processing_task4_latest.json`, created at `2026-05-18T11:48:52`.
 
-| Metric | Actual latest value |
-| --- | ---: |
-| API trigger status | 202 |
-| Generated test orders | 250 |
-| Chunk size | 50 |
-| Expected chunks | 5 |
-| Actual chunks processed | 5 |
-| Total orders in batch | 250 |
-| Total order items | 250 |
-| Total quantity sold | 750 |
-| Expected total quantity sold | 750 |
-| Total sales | 11355.00 |
-| Expected total sales | 11355.00 |
-| Total sales correct | true |
-| Daily sales report created | true |
-| Report totals match | true |
-| Celery task ID present | true |
-| Metadata chunk count | 5 |
-| All chunks within chunk size | true |
-| Batch status | success |
-| Passed | true |
+| Metric                       | Actual latest value |
+| ---------------------------- | ------------------: |
+| API trigger status           |                 202 |
+| Generated test orders        |                 250 |
+| Chunk size                   |                  50 |
+| Expected chunks              |                   5 |
+| Actual chunks processed      |                   5 |
+| Total orders in batch        |                 250 |
+| Total order items            |                 250 |
+| Total quantity sold          |                 750 |
+| Expected total quantity sold |                 750 |
+| Total sales                  |            11355.00 |
+| Expected total sales         |            11355.00 |
+| Total sales correct          |                true |
+| Daily sales report created   |                true |
+| Report totals match          |                true |
+| Celery task ID present       |                true |
+| Metadata chunk count         |                   5 |
+| All chunks within chunk size |                true |
+| Batch status                 |             success |
+| Passed                       |                true |
 
 **Conclusion:** Task 4 passed. The report job processed 250 orders in five chunks of 50 and produced correct final totals.
 
@@ -381,25 +381,25 @@ Background task names:
 
 **Latest proof result:** `results/load_distribution/load_distribution_task5_latest.json`, created at `2026-05-18T11:49:07`.
 
-| Metric | Actual latest value |
-| --- | ---: |
-| Load balancer URL | `http://load_balancer` |
-| Strategy | Round Robin |
-| Total requests | 61 |
-| Successful responses | 61 |
-| Failed responses | 0 |
-| Backend distribution: `web-1` | 21 |
-| Backend distribution: `web-2` | 20 |
-| Backend distribution: `web-3` | 20 |
-| Unique backend servers reached | 3 |
-| All expected servers reached | true |
-| Distribution reasonably balanced | true |
-| Balance threshold | 15.25 |
-| Min backend request count | 20 |
-| Max backend request count | 21 |
-| Health endpoint available | true |
-| Response has server name | true |
-| Passed | true |
+| Metric                           |      Actual latest value |
+| -------------------------------- | -----------------------: |
+| Load balancer URL                | `http://load_balancer` |
+| Strategy                         |              Round Robin |
+| Total requests                   |                       61 |
+| Successful responses             |                       61 |
+| Failed responses                 |                        0 |
+| Backend distribution:`web-1`   |                       21 |
+| Backend distribution:`web-2`   |                       20 |
+| Backend distribution:`web-3`   |                       20 |
+| Unique backend servers reached   |                        3 |
+| All expected servers reached     |                     true |
+| Distribution reasonably balanced |                     true |
+| Balance threshold                |                    15.25 |
+| Min backend request count        |                       20 |
+| Max backend request count        |                       21 |
+| Health endpoint available        |                     true |
+| Response has server name         |                     true |
+| Passed                           |                     true |
 
 **Conclusion:** Task 5 passed. HAProxy distributed requests across all three Django backend containers with a balanced Round Robin pattern.
 
@@ -407,23 +407,23 @@ Background task names:
 
 The project includes dedicated proof scripts for each reported task. Latest JSON files exist for Tasks 1-5.
 
-| Task | Proof script | Latest result file | Passed |
-| --- | --- | --- | --- |
-| Task 1 | `scripts/race_condition_test.py` | `results/race_condition/race_condition_task1_latest.json` | true |
-| Task 2 | `scripts/resource_capacity_test.py` | `results/resource_capacity/resource_capacity_task2_latest.json` | true |
-| Task 3 | `scripts/async_queue_test.py` | `results/async_queues/async_queue_task3_latest.json` | true |
-| Task 4 | `scripts/batch_processing_test.py` | `results/batch_processing/batch_processing_task4_latest.json` | true |
-| Task 5 | `scripts/load_distribution_test.py` | `results/load_distribution/load_distribution_task5_latest.json` | true |
+| Task   | Proof script                          | Latest result file                                                | Passed |
+| ------ | ------------------------------------- | ----------------------------------------------------------------- | ------ |
+| Task 1 | `scripts/race_condition_test.py`    | `results/race_condition/race_condition_task1_latest.json`       | true   |
+| Task 2 | `scripts/resource_capacity_test.py` | `results/resource_capacity/resource_capacity_task2_latest.json` | true   |
+| Task 3 | `scripts/async_queue_test.py`       | `results/async_queues/async_queue_task3_latest.json`            | true   |
+| Task 4 | `scripts/batch_processing_test.py`  | `results/batch_processing/batch_processing_task4_latest.json`   | true   |
+| Task 5 | `scripts/load_distribution_test.py` | `results/load_distribution/load_distribution_task5_latest.json` | true   |
 
 Summary of latest proof outcomes:
 
-| Task | Main proof outcome |
-| --- | --- |
+| Task   | Main proof outcome                                                                                                                                                      |
+| ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Task 1 | 20 concurrent users attempted checkout; 5 succeeded, 15 failed because stock was exhausted, capacity rejections were 0, final stock was 0, and no overselling occurred. |
-| Task 2 | 20 concurrent users were tested; max active checkouts was 6, capacity rejections were 12, and server errors were 0. |
-| Task 3 | Checkout took 77.18 ms while background tasks took 2054 ms total, proving non-blocking asynchronous work. |
-| Task 4 | 250 orders were processed in 5 chunks of 50, with correct total quantity and sales values. |
-| Task 5 | 61 requests reached all three backend servers with distribution `web-1:21`, `web-2:20`, `web-3:20`. |
+| Task 2 | 20 concurrent users were tested; max active checkouts was 6, capacity rejections were 12, and server errors were 0.                                                     |
+| Task 3 | Checkout took 77.18 ms while background tasks took 2054 ms total, proving non-blocking asynchronous work.                                                               |
+| Task 4 | 250 orders were processed in 5 chunks of 50, with correct total quantity and sales values.                                                                              |
+| Task 5 | 61 requests reached all three backend servers with distribution `web-1:21`, `web-2:20`, `web-3:20`.                                                               |
 
 If any future result file is missing, the result table should be replaced with a clear placeholder such as: "Result must be inserted after running the proof script." In the current repository state, all five latest JSON files are present.
 
@@ -436,13 +436,11 @@ A concise demo for Tasks 1-5 can follow this sequence:
    ```bash
    docker compose up --build
    ```
-
 2. Open the API documentation:
 
    ```text
    http://127.0.0.1:8000/api/docs/
    ```
-
 3. Show the application flow:
 
    - Register or log in.
@@ -450,7 +448,6 @@ A concise demo for Tasks 1-5 can follow this sequence:
    - Add a product to the cart.
    - Run checkout.
    - View orders.
-
 4. Run proof scripts:
 
    ```bash
@@ -460,7 +457,6 @@ A concise demo for Tasks 1-5 can follow this sequence:
    docker compose exec web python scripts/batch_processing_test.py
    docker compose exec web python scripts/load_distribution_test.py
    ```
-
 5. Show monitoring and system endpoints:
 
    ```text
@@ -492,12 +488,12 @@ The implementation remains a monolithic Django backend, but it uses shared infra
 
 ## Final Checklist
 
-| Item | Status |
-| --- | --- |
-| Source code exists | Yes |
-| Docker Compose exists | Yes |
-| AOP monitoring exists | Yes |
-| Proof scripts exist | Yes |
-| Latest result JSON files exist | Yes |
-| Tasks 1-5 passed | Yes |
-| Final report created | Yes |
+| Item                           | Status |
+| ------------------------------ | ------ |
+| Source code exists             | Yes    |
+| Docker Compose exists          | Yes    |
+| AOP monitoring exists          | Yes    |
+| Proof scripts exist            | Yes    |
+| Latest result JSON files exist | Yes    |
+| Tasks 1-5 passed               | Yes    |
+| Final report created           | Yes    |

@@ -41,35 +41,43 @@
       "username": "race_user_001",
       "status_code": 201,
       "response": {
-        "order_id": 1788,
+        "order_id": 1780,
         "total_price": "10.00",
         "status": "paid",
         "message": "Checkout completed successfully.",
         "background_tasks_dispatched": true
       },
-      "duration_ms": 313.13,
+      "duration_ms": 149.19,
       "success": true,
       "failure_reason": ""
     },
     {
       "username": "race_user_002",
-      "status_code": 400,
+      "status_code": 201,
       "response": {
-        "error": "Out of stock"
+        "order_id": 1781,
+        "total_price": "10.00",
+        "status": "paid",
+        "message": "Checkout completed successfully.",
+        "background_tasks_dispatched": true
       },
-      "duration_ms": 276.42,
-      "success": false,
-      "failure_reason": "insufficient_stock"
+      "duration_ms": 390.63,
+      "success": true,
+      "failure_reason": ""
     },
     {
       "username": "race_user_003",
-      "status_code": 400,
+      "status_code": 201,
       "response": {
-        "error": "Out of stock"
+        "order_id": 1782,
+        "total_price": "10.00",
+        "status": "paid",
+        "message": "Checkout completed successfully.",
+        "background_tasks_dispatched": true
       },
-      "duration_ms": 583.38,
-      "success": false,
-      "failure_reason": "insufficient_stock"
+      "duration_ms": 220.52,
+      "success": true,
+      "failure_reason": ""
     },
     {
       "username": "race_user_004",
@@ -77,7 +85,7 @@
       "response": {
         "error": "Out of stock"
       },
-      "duration_ms": 318.59,
+      "duration_ms": 279.84,
       "success": false,
       "failure_reason": "insufficient_stock"
     },
@@ -87,7 +95,7 @@
       "response": {
         "error": "Out of stock"
       },
-      "duration_ms": 653.99,
+      "duration_ms": 300.91,
       "success": false,
       "failure_reason": "insufficient_stock"
     },
@@ -97,7 +105,7 @@
       "response": {
         "error": "Out of stock"
       },
-      "duration_ms": 379.51,
+      "duration_ms": 341.98,
       "success": false,
       "failure_reason": "insufficient_stock"
     },
@@ -105,13 +113,13 @@
       "username": "race_user_007",
       "status_code": 201,
       "response": {
-        "order_id": 1786,
+        "order_id": 1783,
         "total_price": "10.00",
         "status": "paid",
         "message": "Checkout completed successfully.",
         "background_tasks_dispatched": true
       },
-      "duration_ms": 338.74,
+      "duration_ms": 275.56,
       "success": true,
       "failure_reason": ""
     },
@@ -121,7 +129,7 @@
       "response": {
         "error": "Out of stock"
       },
-      "duration_ms": 218.65,
+      "duration_ms": 319.0,
       "success": false,
       "failure_reason": "insufficient_stock"
     },
@@ -131,47 +139,43 @@
       "response": {
         "error": "Out of stock"
       },
-      "duration_ms": 210.8,
+      "duration_ms": 308.75,
       "success": false,
       "failure_reason": "insufficient_stock"
     },
     {
       "username": "race_user_010",
+      "status_code": 201,
+      "response": {
+        "order_id": 1784,
+        "total_price": "10.00",
+        "status": "paid",
+        "message": "Checkout completed successfully.",
+        "background_tasks_dispatched": true
+      },
+      "duration_ms": 293.56,
+      "success": true,
+      "failure_reason": ""
+    },
+    {
+      "username": "race_user_011",
       "status_code": 400,
       "response": {
         "error": "Out of stock"
       },
-      "duration_ms": 589.52,
+      "duration_ms": 352.26,
       "success": false,
       "failure_reason": "insufficient_stock"
     },
     {
-      "username": "race_user_011",
-      "status_code": 201,
-      "response": {
-        "order_id": 1785,
-        "total_price": "10.00",
-        "status": "paid",
-        "message": "Checkout completed successfully.",
-        "background_tasks_dispatched": true
-      },
-      "duration_ms": 274.12,
-      "success": true,
-      "failure_reason": ""
-    },
-    {
       "username": "race_user_012",
-      "status_code": 201,
+      "status_code": 400,
       "response": {
-        "order_id": 1789,
-        "total_price": "10.00",
-        "status": "paid",
-        "message": "Checkout completed successfully.",
-        "background_tasks_dispatched": true
+        "error": "Out of stock"
       },
-      "duration_ms": 368.66,
-      "success": true,
-      "failure_reason": ""
+      "duration_ms": 312.27,
+      "success": false,
+      "failure_reason": "insufficient_stock"
     },
     {
       "username": "race_user_013",
@@ -179,7 +183,7 @@
       "response": {
         "error": "Out of stock"
       },
-      "duration_ms": 724.19,
+      "duration_ms": 361.33,
       "success": false,
       "failure_reason": "insufficient_stock"
     },
@@ -189,7 +193,7 @@
       "response": {
         "error": "Out of stock"
       },
-      "duration_ms": 225.65,
+      "duration_ms": 256.8,
       "success": false,
       "failure_reason": "insufficient_stock"
     },
@@ -199,7 +203,7 @@
       "response": {
         "error": "Out of stock"
       },
-      "duration_ms": 652.36,
+      "duration_ms": 289.15,
       "success": false,
       "failure_reason": "insufficient_stock"
     },
@@ -209,23 +213,19 @@
       "response": {
         "error": "Out of stock"
       },
-      "duration_ms": 564.43,
+      "duration_ms": 318.41,
       "success": false,
       "failure_reason": "insufficient_stock"
     },
     {
       "username": "race_user_017",
-      "status_code": 201,
+      "status_code": 400,
       "response": {
-        "order_id": 1787,
-        "total_price": "10.00",
-        "status": "paid",
-        "message": "Checkout completed successfully.",
-        "background_tasks_dispatched": true
+        "error": "Out of stock"
       },
-      "duration_ms": 275.69,
-      "success": true,
-      "failure_reason": ""
+      "duration_ms": 321.36,
+      "success": false,
+      "failure_reason": "insufficient_stock"
     },
     {
       "username": "race_user_018",
@@ -233,7 +233,7 @@
       "response": {
         "error": "Out of stock"
       },
-      "duration_ms": 409.14,
+      "duration_ms": 258.18,
       "success": false,
       "failure_reason": "insufficient_stock"
     },
@@ -243,7 +243,7 @@
       "response": {
         "error": "Out of stock"
       },
-      "duration_ms": 211.04,
+      "duration_ms": 358.48,
       "success": false,
       "failure_reason": "insufficient_stock"
     },
@@ -253,10 +253,10 @@
       "response": {
         "error": "Out of stock"
       },
-      "duration_ms": 383.64,
+      "duration_ms": 338.05,
       "success": false,
       "failure_reason": "insufficient_stock"
     }
   ],
-  "created_at": "2026-06-20T07:28:32"
+  "created_at": "2026-06-20T07:27:06"
 }

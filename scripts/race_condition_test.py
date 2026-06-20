@@ -28,6 +28,7 @@ if not apps.ready:
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.db.models import Sum
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from cart.models import Cart, CartItem
 from orders.models import Order, OrderItem
@@ -183,19 +184,9 @@ def setup_test_data(user_count, initial_stock, quantity, product_name):
         raise RaceTestError(f"Database setup failed: {exc}") from exc
 
 
-def obtain_token(base_url, username):
-    status_code, payload, _ = post_json(
-        f"{base_url}/api/auth/token/",
-        {"username": username, "password": RACE_PASSWORD},
-        timeout=15,
-    )
-    if status_code != 200 or "access" not in payload:
-        raise RaceTestError(
-            "JWT login failed. Check that the Django API is running and that "
-            f"API_BASE_URL/--base-url points to the right server. User: {username}. "
-            f"Status: {status_code}. Response: {payload}"
-        )
-    return payload["access"]
+def issue_access_token(user):
+    refresh = RefreshToken.for_user(user)
+    return str(refresh.access_token)
 
 
 def checkout_user(base_url, username, token, barrier, capacity_limit):
@@ -230,7 +221,7 @@ def checkout_user(base_url, username, token, barrier, capacity_limit):
 
 
 def run_concurrent_checkouts(base_url, users, capacity_limit):
-    tokens = {user.username: obtain_token(base_url, user.username) for user in users}
+    tokens = {user.username: issue_access_token(user) for user in users}
     barrier = threading.Barrier(len(users))
     results = []
 
@@ -261,7 +252,9 @@ def classify_failure(status_code, payload):
         return str(code)
 
     detail = payload.get("detail", "") if isinstance(payload, dict) else ""
-    if "not enough stock" in str(detail).lower():
+    error = payload.get("error", "") if isinstance(payload, dict) else ""
+    message = f"{detail} {error}".lower()
+    if "not enough stock" in message or "out of stock" in message:
         return "insufficient_stock"
 
     if status_code is None:

@@ -17,9 +17,9 @@
       "400": 15
     },
     "error_code_counts": {
-      "insufficient_stock": 15
+      "http_400": 15
     },
-    "insufficient_stock_count": 15,
+    "insufficient_stock_count": 0,
     "capacity_rejected_count": 0,
     "server_errors": 0,
     "final_stock": 0,
@@ -28,7 +28,7 @@
     "payment_count": 5,
     "negative_stock": false,
     "overselling": false,
-    "passed": true
+    "passed": false
   },
   "database_state": {
     "final_stock": 0,
@@ -41,13 +41,13 @@
       "username": "race_user_001",
       "status_code": 201,
       "response": {
-        "order_id": 1788,
+        "order_id": 1762,
         "total_price": "10.00",
         "status": "paid",
         "message": "Checkout completed successfully.",
         "background_tasks_dispatched": true
       },
-      "duration_ms": 313.13,
+      "duration_ms": 181.44,
       "success": true,
       "failure_reason": ""
     },
@@ -57,9 +57,9 @@
       "response": {
         "error": "Out of stock"
       },
-      "duration_ms": 276.42,
+      "duration_ms": 268.59,
       "success": false,
-      "failure_reason": "insufficient_stock"
+      "failure_reason": "http_400"
     },
     {
       "username": "race_user_003",
@@ -67,9 +67,9 @@
       "response": {
         "error": "Out of stock"
       },
-      "duration_ms": 583.38,
+      "duration_ms": 177.36,
       "success": false,
-      "failure_reason": "insufficient_stock"
+      "failure_reason": "http_400"
     },
     {
       "username": "race_user_004",
@@ -77,9 +77,9 @@
       "response": {
         "error": "Out of stock"
       },
-      "duration_ms": 318.59,
+      "duration_ms": 111.6,
       "success": false,
-      "failure_reason": "insufficient_stock"
+      "failure_reason": "http_400"
     },
     {
       "username": "race_user_005",
@@ -87,9 +87,9 @@
       "response": {
         "error": "Out of stock"
       },
-      "duration_ms": 653.99,
+      "duration_ms": 120.18,
       "success": false,
-      "failure_reason": "insufficient_stock"
+      "failure_reason": "http_400"
     },
     {
       "username": "race_user_006",
@@ -97,23 +97,19 @@
       "response": {
         "error": "Out of stock"
       },
-      "duration_ms": 379.51,
+      "duration_ms": 252.86,
       "success": false,
-      "failure_reason": "insufficient_stock"
+      "failure_reason": "http_400"
     },
     {
       "username": "race_user_007",
-      "status_code": 201,
+      "status_code": 400,
       "response": {
-        "order_id": 1786,
-        "total_price": "10.00",
-        "status": "paid",
-        "message": "Checkout completed successfully.",
-        "background_tasks_dispatched": true
+        "error": "Out of stock"
       },
-      "duration_ms": 338.74,
-      "success": true,
-      "failure_reason": ""
+      "duration_ms": 111.85,
+      "success": false,
+      "failure_reason": "http_400"
     },
     {
       "username": "race_user_008",
@@ -121,19 +117,23 @@
       "response": {
         "error": "Out of stock"
       },
-      "duration_ms": 218.65,
+      "duration_ms": 109.42,
       "success": false,
-      "failure_reason": "insufficient_stock"
+      "failure_reason": "http_400"
     },
     {
       "username": "race_user_009",
-      "status_code": 400,
+      "status_code": 201,
       "response": {
-        "error": "Out of stock"
+        "order_id": 1761,
+        "total_price": "10.00",
+        "status": "paid",
+        "message": "Checkout completed successfully.",
+        "background_tasks_dispatched": true
       },
-      "duration_ms": 210.8,
-      "success": false,
-      "failure_reason": "insufficient_stock"
+      "duration_ms": 283.23,
+      "success": true,
+      "failure_reason": ""
     },
     {
       "username": "race_user_010",
@@ -141,35 +141,31 @@
       "response": {
         "error": "Out of stock"
       },
-      "duration_ms": 589.52,
+      "duration_ms": 113.98,
       "success": false,
-      "failure_reason": "insufficient_stock"
+      "failure_reason": "http_400"
     },
     {
       "username": "race_user_011",
-      "status_code": 201,
+      "status_code": 400,
       "response": {
-        "order_id": 1785,
-        "total_price": "10.00",
-        "status": "paid",
-        "message": "Checkout completed successfully.",
-        "background_tasks_dispatched": true
+        "error": "Out of stock"
       },
-      "duration_ms": 274.12,
-      "success": true,
-      "failure_reason": ""
+      "duration_ms": 122.9,
+      "success": false,
+      "failure_reason": "http_400"
     },
     {
       "username": "race_user_012",
       "status_code": 201,
       "response": {
-        "order_id": 1789,
+        "order_id": 1758,
         "total_price": "10.00",
         "status": "paid",
         "message": "Checkout completed successfully.",
         "background_tasks_dispatched": true
       },
-      "duration_ms": 368.66,
+      "duration_ms": 145.0,
       "success": true,
       "failure_reason": ""
     },
@@ -179,9 +175,9 @@
       "response": {
         "error": "Out of stock"
       },
-      "duration_ms": 724.19,
+      "duration_ms": 267.32,
       "success": false,
-      "failure_reason": "insufficient_stock"
+      "failure_reason": "http_400"
     },
     {
       "username": "race_user_014",
@@ -189,19 +185,23 @@
       "response": {
         "error": "Out of stock"
       },
-      "duration_ms": 225.65,
+      "duration_ms": 115.14,
       "success": false,
-      "failure_reason": "insufficient_stock"
+      "failure_reason": "http_400"
     },
     {
       "username": "race_user_015",
-      "status_code": 400,
+      "status_code": 201,
       "response": {
-        "error": "Out of stock"
+        "order_id": 1760,
+        "total_price": "10.00",
+        "status": "paid",
+        "message": "Checkout completed successfully.",
+        "background_tasks_dispatched": true
       },
-      "duration_ms": 652.36,
-      "success": false,
-      "failure_reason": "insufficient_stock"
+      "duration_ms": 229.28,
+      "success": true,
+      "failure_reason": ""
     },
     {
       "username": "race_user_016",
@@ -209,23 +209,19 @@
       "response": {
         "error": "Out of stock"
       },
-      "duration_ms": 564.43,
+      "duration_ms": 130.44,
       "success": false,
-      "failure_reason": "insufficient_stock"
+      "failure_reason": "http_400"
     },
     {
       "username": "race_user_017",
-      "status_code": 201,
+      "status_code": 400,
       "response": {
-        "order_id": 1787,
-        "total_price": "10.00",
-        "status": "paid",
-        "message": "Checkout completed successfully.",
-        "background_tasks_dispatched": true
+        "error": "Out of stock"
       },
-      "duration_ms": 275.69,
-      "success": true,
-      "failure_reason": ""
+      "duration_ms": 113.11,
+      "success": false,
+      "failure_reason": "http_400"
     },
     {
       "username": "race_user_018",
@@ -233,9 +229,9 @@
       "response": {
         "error": "Out of stock"
       },
-      "duration_ms": 409.14,
+      "duration_ms": 294.46,
       "success": false,
-      "failure_reason": "insufficient_stock"
+      "failure_reason": "http_400"
     },
     {
       "username": "race_user_019",
@@ -243,20 +239,24 @@
       "response": {
         "error": "Out of stock"
       },
-      "duration_ms": 211.04,
+      "duration_ms": 250.43,
       "success": false,
-      "failure_reason": "insufficient_stock"
+      "failure_reason": "http_400"
     },
     {
       "username": "race_user_020",
-      "status_code": 400,
+      "status_code": 201,
       "response": {
-        "error": "Out of stock"
+        "order_id": 1759,
+        "total_price": "10.00",
+        "status": "paid",
+        "message": "Checkout completed successfully.",
+        "background_tasks_dispatched": true
       },
-      "duration_ms": 383.64,
-      "success": false,
-      "failure_reason": "insufficient_stock"
+      "duration_ms": 157.05,
+      "success": true,
+      "failure_reason": ""
     }
   ],
-  "created_at": "2026-06-20T07:28:32"
+  "created_at": "2026-06-20T06:58:18"
 }

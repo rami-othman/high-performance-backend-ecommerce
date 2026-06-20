@@ -28,6 +28,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.db.models import Sum
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from cart.models import Cart, CartItem
 from orders.models import Order, OrderItem
@@ -189,19 +190,18 @@ def setup_test_data(user_count, initial_stock, quantity, product_name):
         raise CapacityTestError(f"Database setup failed: {exc}") from exc
 
 
-def obtain_token(base_url, username):
-    status_code, payload, _ = post_json(
-        f"{base_url}/api/auth/token/",
-        {"username": username, "password": CAPACITY_PASSWORD},
-        timeout=15,
-    )
-    if status_code != 200 or "access" not in payload:
-        raise CapacityTestError(
-            "JWT login failed. Check that the Django API is running and that "
-            f"API_BASE_URL/--base-url points to the right server. User: {username}. "
-            f"Status: {status_code}. Response: {payload}"
-        )
-    return payload["access"]
+def issue_access_token(user):
+    refresh = RefreshToken.for_user(user)
+    return str(refresh.access_token)
+
+
+def is_capacity_rejected(status_code, payload):
+    if status_code != 429 or not isinstance(payload, dict):
+        return False
+
+    code = str(payload.get("code", ""))
+    detail = str(payload.get("detail", ""))
+    return code == "checkout_capacity_exceeded" or detail.lower() == "busy"
 
 
 def checkout_user(base_url, username, token, barrier, delay):
@@ -222,7 +222,7 @@ def checkout_user(base_url, username, token, barrier, delay):
             "response": payload,
             "duration_ms": duration_ms,
             "success": 200 <= status_code < 300,
-            "capacity_rejected": status_code == 429 and payload.get("code") == "checkout_capacity_exceeded",
+            "capacity_rejected": is_capacity_rejected(status_code, payload),
             "server_error": status_code is not None and status_code >= 500,
         }
     except Exception as exc:
@@ -238,7 +238,7 @@ def checkout_user(base_url, username, token, barrier, delay):
 
 
 def run_concurrent_checkouts(base_url, users, delay):
-    tokens = {user.username: obtain_token(base_url, user.username) for user in users}
+    tokens = {user.username: issue_access_token(user) for user in users}
     barrier = threading.Barrier(len(users))
     results = []
 

@@ -2,13 +2,13 @@
   "success_case": {
     "status_code": 201,
     "response": {
-      "order_id": 2672,
+      "order_id": 1763,
       "total_price": "26.00",
       "status": "paid",
       "message": "Checkout completed successfully.",
       "background_tasks_dispatched": true
     },
-    "duration_ms": 114.57,
+    "duration_ms": 37.33,
     "checks": {
       "checkout_returned_201": true,
       "stock_reduced": true,
@@ -22,9 +22,9 @@
   "rollback_case": {
     "status_code": 500,
     "response": {
-      "raw_body": "RuntimeError at /api/orders/checkout/\nDebug checkout failure injected after stock reduction.\n\nRequest Method: POST\nRequest URL: http://127.0.0.1:8000/api/orders/checkout/\nDjango Version: 5.2.14\nPython Executable: /usr/local/bin/python3.11\nPython Version: 3.11.15\nPython Path: ['/app', '/app', '/usr/local/bin', '/usr/local/lib/python311.zip', '/usr/local/lib/python3.11', '/usr/local/lib/python3.11/lib-dynload', '/usr/local/lib/python3.11/site-packages']\nServer time: Sat, 20 Jun 2026 09:29:01 +0000"
+      "raw_body": "RuntimeError at /api/orders/checkout/\nDebug checkout failure injected after stock reduction.\n\nRequest Method: POST\nRequest URL: http://127.0.0.1:8000/api/orders/checkout/\nDjango Version: 5.2.14\nPython Executable: /usr/local/bin/python3.11\nPython Version: 3.11.15\nPython Path: ['/app', '/app', '/usr/local/bin', '/usr/local/lib/python311.zip', '/usr/local/lib/python3.11', '/usr/local/lib/python3.11/lib-dynload', '/usr/local/lib/python3.11/site-packages']\nServer time: Sat, 20 Jun 2026 07:01:44 +0000"
     },
-    "duration_ms": 72.76,
+    "duration_ms": 72.4,
     "checks": {
       "checkout_failed": true,
       "stock_unchanged": true,
@@ -38,10 +38,10 @@
   },
   "initial_state": {
     "success_case": {
-      "user_id": 1943,
-      "username": "acid_task8_user_success_20260620092900610547",
-      "product_id": 105,
-      "product_name": "ACID Task 8 Product success 20260620092900610547",
+      "user_id": 1077,
+      "username": "acid_task8_user_success_20260620070143895953",
+      "product_id": 68,
+      "product_name": "ACID Task 8 Product success 20260620070143895953",
       "product_stock": 5,
       "cart_item_count": 1,
       "cart_quantity": 2,
@@ -51,10 +51,10 @@
       "background_task_count": 0
     },
     "rollback_case": {
-      "user_id": 1944,
-      "username": "acid_task8_user_rollback_20260620092901241497",
-      "product_id": 106,
-      "product_name": "ACID Task 8 Product rollback 20260620092901241497",
+      "user_id": 1078,
+      "username": "acid_task8_user_rollback_20260620070144301557",
+      "product_id": 69,
+      "product_name": "ACID Task 8 Product rollback 20260620070144301557",
       "product_stock": 5,
       "cart_item_count": 1,
       "cart_quantity": 2,
@@ -66,10 +66,10 @@
   },
   "final_state": {
     "success_case": {
-      "user_id": 1943,
-      "username": "acid_task8_user_success_20260620092900610547",
-      "product_id": 105,
-      "product_name": "ACID Task 8 Product success 20260620092900610547",
+      "user_id": 1077,
+      "username": "acid_task8_user_success_20260620070143895953",
+      "product_id": 68,
+      "product_name": "ACID Task 8 Product success 20260620070143895953",
       "product_stock": 3,
       "cart_item_count": 0,
       "cart_quantity": 0,
@@ -79,10 +79,10 @@
       "background_task_count": 2
     },
     "rollback_case": {
-      "user_id": 1944,
-      "username": "acid_task8_user_rollback_20260620092901241497",
-      "product_id": 106,
-      "product_name": "ACID Task 8 Product rollback 20260620092901241497",
+      "user_id": 1078,
+      "username": "acid_task8_user_rollback_20260620070144301557",
+      "product_id": 69,
+      "product_name": "ACID Task 8 Product rollback 20260620070144301557",
       "product_stock": 5,
       "cart_item_count": 1,
       "cart_quantity": 2,
@@ -95,7 +95,7 @@
   "result": "PASSED",
   "passed": true,
   "debug_failure_enabled": true,
-  "created_at": "2026-06-20T09:29:01",
+  "created_at": "2026-06-20T07:01:44",
   "api_base_url": "http://127.0.0.1:8000",
   "failure_header": "X-Debug-Fail-Checkout-After-Stock"
 }

@@ -321,6 +321,26 @@ class RaceConditionScriptTests(TestCase):
         self.assertEqual(metrics["capacity_rejected_count"], 1)
         self.assertEqual(metrics["server_error_count"], 1)
 
+    def test_classify_failure_recognizes_current_out_of_stock_error_response(self):
+        from scripts.race_condition_test import classify_failure
+
+        self.assertEqual(classify_failure(400, {"error": "Out of stock"}), "insufficient_stock")
+
+    def test_race_condition_script_issues_tokens_locally_without_auth_endpoint(self):
+        from scripts.race_condition_test import issue_access_token
+
+        user = get_user_model().objects.create_user(
+            username="race-token-user",
+            password="RaceTestPassword123!",
+        )
+
+        with patch("scripts.race_condition_test.post_json") as post_json:
+            token = issue_access_token(user)
+
+        self.assertIsInstance(token, str)
+        self.assertGreater(len(token), 20)
+        post_json.assert_not_called()
+
     def test_build_summary_requires_stock_failures_not_capacity_failures(self):
         from scripts.race_condition_test import build_summary
 
@@ -407,6 +427,30 @@ class CheckoutCapacityTestLimitOverrideTests(TestCase):
         request = SimpleNamespace(headers={"X-Race-Condition-Test-Capacity-Limit": "50"})
 
         self.assertEqual(get_checkout_capacity_limit(request), 5)
+
+
+class ResourceCapacityScriptTests(TestCase):
+    def test_capacity_rejection_recognizes_current_busy_response(self):
+        from scripts.resource_capacity_test import is_capacity_rejected
+
+        self.assertTrue(is_capacity_rejected(429, {"detail": "Busy"}))
+        self.assertTrue(is_capacity_rejected(429, {"code": "checkout_capacity_exceeded"}))
+        self.assertFalse(is_capacity_rejected(400, {"detail": "Busy"}))
+
+    def test_resource_capacity_script_issues_tokens_locally_without_auth_endpoint(self):
+        from scripts.resource_capacity_test import issue_access_token
+
+        user = get_user_model().objects.create_user(
+            username="capacity-token-user",
+            password="CapacityTestPassword123!",
+        )
+
+        with patch("scripts.resource_capacity_test.post_json") as post_json:
+            token = issue_access_token(user)
+
+        self.assertIsInstance(token, str)
+        self.assertGreater(len(token), 20)
+        post_json.assert_not_called()
 
 
 @override_settings(

@@ -1,7 +1,7 @@
 {
   "api_base_url": "http://127.0.0.1:8000",
   "product_id": 23,
-  "batch_run_id": 15,
+  "batch_run_id": 13,
   "summary": {
     "endpoint_count": 4,
     "cache_header_success_count": 4,
@@ -16,27 +16,27 @@
       "first_request": {
         "status": 200,
         "x_cache": "MISS",
-        "duration_ms": 46.5,
+        "duration_ms": 38.16,
         "body": [
           {
-            "id": 84,
-            "name": "ACID Task 8 Product rollback 20260620073758116961",
+            "id": 69,
+            "name": "ACID Task 8 Product rollback 20260620070144301557",
             "description": "Temporary product used by scripts/acid_transaction_test.py.",
             "price": "13.00",
             "stock": 5,
             "version": 1,
-            "created_at": "2026-06-20T07:37:58.334767Z",
-            "updated_at": "2026-06-20T07:37:58.334776Z"
+            "created_at": "2026-06-20T07:01:44.506900Z",
+            "updated_at": "2026-06-20T07:01:44.506914Z"
           },
           {
-            "id": 83,
-            "name": "ACID Task 8 Product success 20260620073757613836",
+            "id": 68,
+            "name": "ACID Task 8 Product success 20260620070143895953",
             "description": "Temporary product used by scripts/acid_transaction_test.py.",
             "price": "13.00",
             "stock": 3,
             "version": 1,
-            "created_at": "2026-06-20T07:37:57.807707Z",
-            "updated_at": "2026-06-20T07:37:57.807717Z"
+            "created_at": "2026-06-20T07:01:44.063262Z",
+            "updated_at": "2026-06-20T07:01:44.063269Z"
           },
           {
             "id": 7,
@@ -96,7 +96,7 @@
             "stock": 25,
             "version": 1,
             "created_at": "2026-06-19T18:18:08.001271Z",
-            "updated_at": "2026-06-20T09:11:06.289616Z"
+            "updated_at": "2026-06-20T07:37:25.416762Z"
           },
           {
             "id": 4,
@@ -159,131 +159,131 @@
             "updated_at": "2026-06-20T07:35:56.713951Z"
           },
           {
-            "id": 95,
+            "id": 70,
             "name": "Stress Task 9 Product 01",
             "description": "Temporary product used by scripts/stress_test_100_users.py.",
             "price": "19.99",
-            "stock": 10,
+            "stock": 20,
             "version": 1,
-            "created_at": "2026-06-20T07:39:26.630190Z",
-            "updated_at": "2026-06-20T07:39:26.630204Z"
+            "created_at": "2026-06-20T07:05:25.355355Z",
+            "updated_at": "2026-06-20T07:05:25.355386Z"
           },
           {
-            "id": 96,
+            "id": 71,
             "name": "Stress Task 9 Product 02",
             "description": "Temporary product used by scripts/stress_test_100_users.py.",
             "price": "19.99",
-            "stock": 10,
+            "stock": 20,
             "version": 1,
-            "created_at": "2026-06-20T07:39:26.630738Z",
-            "updated_at": "2026-06-20T07:39:26.630745Z"
+            "created_at": "2026-06-20T07:05:25.361030Z",
+            "updated_at": "2026-06-20T07:05:25.361050Z"
           },
           {
-            "id": 97,
+            "id": 72,
             "name": "Stress Task 9 Product 03",
             "description": "Temporary product used by scripts/stress_test_100_users.py.",
             "price": "19.99",
-            "stock": 10,
+            "stock": 20,
             "version": 1,
-            "created_at": "2026-06-20T07:39:26.631129Z",
-            "updated_at": "2026-06-20T07:39:26.631135Z"
+            "created_at": "2026-06-20T07:05:25.361914Z",
+            "updated_at": "2026-06-20T07:05:25.361929Z"
           },
           {
-            "id": 98,
+            "id": 73,
             "name": "Stress Task 9 Product 04",
             "description": "Temporary product used by scripts/stress_test_100_users.py.",
             "price": "19.99",
-            "stock": 10,
+            "stock": 20,
             "version": 1,
-            "created_at": "2026-06-20T07:39:26.631458Z",
-            "updated_at": "2026-06-20T07:39:26.631464Z"
+            "created_at": "2026-06-20T07:05:25.362641Z",
+            "updated_at": "2026-06-20T07:05:25.362654Z"
           },
           {
-            "id": 99,
+            "id": 74,
             "name": "Stress Task 9 Product 05",
             "description": "Temporary product used by scripts/stress_test_100_users.py.",
             "price": "19.99",
-            "stock": 10,
+            "stock": 20,
             "version": 1,
-            "created_at": "2026-06-20T07:39:26.631929Z",
-            "updated_at": "2026-06-20T07:39:26.631934Z"
+            "created_at": "2026-06-20T07:05:25.363189Z",
+            "updated_at": "2026-06-20T07:05:25.363197Z"
           },
           {
-            "id": 100,
+            "id": 75,
             "name": "Stress Task 9 Product 06",
             "description": "Temporary product used by scripts/stress_test_100_users.py.",
             "price": "19.99",
-            "stock": 10,
+            "stock": 20,
             "version": 1,
-            "created_at": "2026-06-20T07:39:26.632271Z",
-            "updated_at": "2026-06-20T07:39:26.632276Z"
+            "created_at": "2026-06-20T07:05:25.363651Z",
+            "updated_at": "2026-06-20T07:05:25.363658Z"
           },
           {
-            "id": 101,
+            "id": 76,
             "name": "Stress Task 9 Product 07",
             "description": "Temporary product used by scripts/stress_test_100_users.py.",
             "price": "19.99",
-            "stock": 10,
+            "stock": 20,
             "version": 1,
-            "created_at": "2026-06-20T07:39:26.632595Z",
-            "updated_at": "2026-06-20T07:39:26.632599Z"
+            "created_at": "2026-06-20T07:05:25.364098Z",
+            "updated_at": "2026-06-20T07:05:25.364106Z"
           },
           {
-            "id": 102,
+            "id": 77,
             "name": "Stress Task 9 Product 08",
             "description": "Temporary product used by scripts/stress_test_100_users.py.",
             "price": "19.99",
-            "stock": 10,
+            "stock": 20,
             "version": 1,
-            "created_at": "2026-06-20T07:39:26.632912Z",
-            "updated_at": "2026-06-20T07:39:26.632916Z"
+            "created_at": "2026-06-20T07:05:25.364573Z",
+            "updated_at": "2026-06-20T07:05:25.364581Z"
           },
           {
-            "id": 103,
+            "id": 78,
             "name": "Stress Task 9 Product 09",
             "description": "Temporary product used by scripts/stress_test_100_users.py.",
             "price": "19.99",
-            "stock": 10,
+            "stock": 20,
             "version": 1,
-            "created_at": "2026-06-20T07:39:26.633222Z",
-            "updated_at": "2026-06-20T07:39:26.633226Z"
+            "created_at": "2026-06-20T07:05:25.365077Z",
+            "updated_at": "2026-06-20T07:05:25.365084Z"
           },
           {
-            "id": 104,
+            "id": 79,
             "name": "Stress Task 9 Product 10",
             "description": "Temporary product used by scripts/stress_test_100_users.py.",
             "price": "19.99",
-            "stock": 10,
+            "stock": 20,
             "version": 1,
-            "created_at": "2026-06-20T07:39:26.633525Z",
-            "updated_at": "2026-06-20T07:39:26.633529Z"
+            "created_at": "2026-06-20T07:05:25.365541Z",
+            "updated_at": "2026-06-20T07:05:25.365548Z"
           }
         ]
       },
       "second_request": {
         "status": 200,
         "x_cache": "HIT",
-        "duration_ms": 15.19,
+        "duration_ms": 18.93,
         "body": [
           {
-            "id": 84,
-            "name": "ACID Task 8 Product rollback 20260620073758116961",
+            "id": 69,
+            "name": "ACID Task 8 Product rollback 20260620070144301557",
             "description": "Temporary product used by scripts/acid_transaction_test.py.",
             "price": "13.00",
             "stock": 5,
             "version": 1,
-            "created_at": "2026-06-20T07:37:58.334767Z",
-            "updated_at": "2026-06-20T07:37:58.334776Z"
+            "created_at": "2026-06-20T07:01:44.506900Z",
+            "updated_at": "2026-06-20T07:01:44.506914Z"
           },
           {
-            "id": 83,
-            "name": "ACID Task 8 Product success 20260620073757613836",
+            "id": 68,
+            "name": "ACID Task 8 Product success 20260620070143895953",
             "description": "Temporary product used by scripts/acid_transaction_test.py.",
             "price": "13.00",
             "stock": 3,
             "version": 1,
-            "created_at": "2026-06-20T07:37:57.807707Z",
-            "updated_at": "2026-06-20T07:37:57.807717Z"
+            "created_at": "2026-06-20T07:01:44.063262Z",
+            "updated_at": "2026-06-20T07:01:44.063269Z"
           },
           {
             "id": 7,
@@ -343,7 +343,7 @@
             "stock": 25,
             "version": 1,
             "created_at": "2026-06-19T18:18:08.001271Z",
-            "updated_at": "2026-06-20T09:11:06.289616Z"
+            "updated_at": "2026-06-20T07:37:25.416762Z"
           },
           {
             "id": 4,
@@ -406,109 +406,109 @@
             "updated_at": "2026-06-20T07:35:56.713951Z"
           },
           {
-            "id": 95,
+            "id": 70,
             "name": "Stress Task 9 Product 01",
             "description": "Temporary product used by scripts/stress_test_100_users.py.",
             "price": "19.99",
-            "stock": 10,
+            "stock": 20,
             "version": 1,
-            "created_at": "2026-06-20T07:39:26.630190Z",
-            "updated_at": "2026-06-20T07:39:26.630204Z"
+            "created_at": "2026-06-20T07:05:25.355355Z",
+            "updated_at": "2026-06-20T07:05:25.355386Z"
           },
           {
-            "id": 96,
+            "id": 71,
             "name": "Stress Task 9 Product 02",
             "description": "Temporary product used by scripts/stress_test_100_users.py.",
             "price": "19.99",
-            "stock": 10,
+            "stock": 20,
             "version": 1,
-            "created_at": "2026-06-20T07:39:26.630738Z",
-            "updated_at": "2026-06-20T07:39:26.630745Z"
+            "created_at": "2026-06-20T07:05:25.361030Z",
+            "updated_at": "2026-06-20T07:05:25.361050Z"
           },
           {
-            "id": 97,
+            "id": 72,
             "name": "Stress Task 9 Product 03",
             "description": "Temporary product used by scripts/stress_test_100_users.py.",
             "price": "19.99",
-            "stock": 10,
+            "stock": 20,
             "version": 1,
-            "created_at": "2026-06-20T07:39:26.631129Z",
-            "updated_at": "2026-06-20T07:39:26.631135Z"
+            "created_at": "2026-06-20T07:05:25.361914Z",
+            "updated_at": "2026-06-20T07:05:25.361929Z"
           },
           {
-            "id": 98,
+            "id": 73,
             "name": "Stress Task 9 Product 04",
             "description": "Temporary product used by scripts/stress_test_100_users.py.",
             "price": "19.99",
-            "stock": 10,
+            "stock": 20,
             "version": 1,
-            "created_at": "2026-06-20T07:39:26.631458Z",
-            "updated_at": "2026-06-20T07:39:26.631464Z"
+            "created_at": "2026-06-20T07:05:25.362641Z",
+            "updated_at": "2026-06-20T07:05:25.362654Z"
           },
           {
-            "id": 99,
+            "id": 74,
             "name": "Stress Task 9 Product 05",
             "description": "Temporary product used by scripts/stress_test_100_users.py.",
             "price": "19.99",
-            "stock": 10,
+            "stock": 20,
             "version": 1,
-            "created_at": "2026-06-20T07:39:26.631929Z",
-            "updated_at": "2026-06-20T07:39:26.631934Z"
+            "created_at": "2026-06-20T07:05:25.363189Z",
+            "updated_at": "2026-06-20T07:05:25.363197Z"
           },
           {
-            "id": 100,
+            "id": 75,
             "name": "Stress Task 9 Product 06",
             "description": "Temporary product used by scripts/stress_test_100_users.py.",
             "price": "19.99",
-            "stock": 10,
+            "stock": 20,
             "version": 1,
-            "created_at": "2026-06-20T07:39:26.632271Z",
-            "updated_at": "2026-06-20T07:39:26.632276Z"
+            "created_at": "2026-06-20T07:05:25.363651Z",
+            "updated_at": "2026-06-20T07:05:25.363658Z"
           },
           {
-            "id": 101,
+            "id": 76,
             "name": "Stress Task 9 Product 07",
             "description": "Temporary product used by scripts/stress_test_100_users.py.",
             "price": "19.99",
-            "stock": 10,
+            "stock": 20,
             "version": 1,
-            "created_at": "2026-06-20T07:39:26.632595Z",
-            "updated_at": "2026-06-20T07:39:26.632599Z"
+            "created_at": "2026-06-20T07:05:25.364098Z",
+            "updated_at": "2026-06-20T07:05:25.364106Z"
           },
           {
-            "id": 102,
+            "id": 77,
             "name": "Stress Task 9 Product 08",
             "description": "Temporary product used by scripts/stress_test_100_users.py.",
             "price": "19.99",
-            "stock": 10,
+            "stock": 20,
             "version": 1,
-            "created_at": "2026-06-20T07:39:26.632912Z",
-            "updated_at": "2026-06-20T07:39:26.632916Z"
+            "created_at": "2026-06-20T07:05:25.364573Z",
+            "updated_at": "2026-06-20T07:05:25.364581Z"
           },
           {
-            "id": 103,
+            "id": 78,
             "name": "Stress Task 9 Product 09",
             "description": "Temporary product used by scripts/stress_test_100_users.py.",
             "price": "19.99",
-            "stock": 10,
+            "stock": 20,
             "version": 1,
-            "created_at": "2026-06-20T07:39:26.633222Z",
-            "updated_at": "2026-06-20T07:39:26.633226Z"
+            "created_at": "2026-06-20T07:05:25.365077Z",
+            "updated_at": "2026-06-20T07:05:25.365084Z"
           },
           {
-            "id": 104,
+            "id": 79,
             "name": "Stress Task 9 Product 10",
             "description": "Temporary product used by scripts/stress_test_100_users.py.",
             "price": "19.99",
-            "stock": 10,
+            "stock": 20,
             "version": 1,
-            "created_at": "2026-06-20T07:39:26.633525Z",
-            "updated_at": "2026-06-20T07:39:26.633529Z"
+            "created_at": "2026-06-20T07:05:25.365541Z",
+            "updated_at": "2026-06-20T07:05:25.365548Z"
           }
         ]
       },
       "expected_cache_headers": true,
-      "duration_delta_ms": 31.31,
+      "duration_delta_ms": 19.23,
       "second_request_faster_or_equal": true
     },
     {
@@ -517,7 +517,7 @@
       "first_request": {
         "status": 200,
         "x_cache": "MISS",
-        "duration_ms": 22.37,
+        "duration_ms": 19.54,
         "body": {
           "id": 23,
           "name": "Cache Task 6 Product",
@@ -526,13 +526,13 @@
           "stock": 25,
           "version": 1,
           "created_at": "2026-06-19T18:18:08.001271Z",
-          "updated_at": "2026-06-20T09:11:06.289616Z"
+          "updated_at": "2026-06-20T07:37:25.416762Z"
         }
       },
       "second_request": {
         "status": 200,
         "x_cache": "HIT",
-        "duration_ms": 16.04,
+        "duration_ms": 12.22,
         "body": {
           "id": 23,
           "name": "Cache Task 6 Product",
@@ -541,11 +541,11 @@
           "stock": 25,
           "version": 1,
           "created_at": "2026-06-19T18:18:08.001271Z",
-          "updated_at": "2026-06-20T09:11:06.289616Z"
+          "updated_at": "2026-06-20T07:37:25.416762Z"
         }
       },
       "expected_cache_headers": true,
-      "duration_delta_ms": 6.33,
+      "duration_delta_ms": 7.32,
       "second_request_faster_or_equal": true
     },
     {
@@ -554,7 +554,7 @@
       "first_request": {
         "status": 200,
         "x_cache": "MISS",
-        "duration_ms": 64.15,
+        "duration_ms": 25.05,
         "body": [
           {
             "id": 6,
@@ -617,10 +617,10 @@
               "stock": 25,
               "version": 1,
               "created_at": "2026-06-19T18:18:08.001271Z",
-              "updated_at": "2026-06-20T09:11:06.289616Z"
+              "updated_at": "2026-06-20T07:37:25.416762Z"
             },
             "created_at": "2026-06-19T18:18:08.017337Z",
-            "updated_at": "2026-06-20T09:11:06.297268Z"
+            "updated_at": "2026-06-20T07:37:25.420276Z"
           },
           {
             "id": 10,
@@ -648,7 +648,7 @@
       "second_request": {
         "status": 200,
         "x_cache": "HIT",
-        "duration_ms": 19.86,
+        "duration_ms": 17.01,
         "body": [
           {
             "id": 6,
@@ -711,10 +711,10 @@
               "stock": 25,
               "version": 1,
               "created_at": "2026-06-19T18:18:08.001271Z",
-              "updated_at": "2026-06-20T09:11:06.289616Z"
+              "updated_at": "2026-06-20T07:37:25.416762Z"
             },
             "created_at": "2026-06-19T18:18:08.017337Z",
-            "updated_at": "2026-06-20T09:11:06.297268Z"
+            "updated_at": "2026-06-20T07:37:25.420276Z"
           },
           {
             "id": 10,
@@ -740,18 +740,18 @@
         ]
       },
       "expected_cache_headers": true,
-      "duration_delta_ms": 44.29,
+      "duration_delta_ms": 8.04,
       "second_request_faster_or_equal": true
     },
     {
       "name": "daily_sales_batch_run_detail",
-      "url": "http://127.0.0.1:8000/api/reports/daily-sales/batch-runs/15/",
+      "url": "http://127.0.0.1:8000/api/reports/daily-sales/batch-runs/13/",
       "first_request": {
         "status": 200,
         "x_cache": "MISS",
-        "duration_ms": 24.43,
+        "duration_ms": 24.25,
         "body": {
-          "id": 15,
+          "id": 13,
           "report_date": "2001-06-19",
           "status": "success",
           "celery_task_id": null,
@@ -782,9 +782,9 @@
       "second_request": {
         "status": 200,
         "x_cache": "HIT",
-        "duration_ms": 15.01,
+        "duration_ms": 15.86,
         "body": {
-          "id": 15,
+          "id": 13,
           "report_date": "2001-06-19",
           "status": "success",
           "celery_task_id": null,
@@ -813,9 +813,9 @@
         }
       },
       "expected_cache_headers": true,
-      "duration_delta_ms": 9.42,
+      "duration_delta_ms": 8.39,
       "second_request_faster_or_equal": true
     }
   ],
-  "created_at": "2026-06-20T09:11:06"
+  "created_at": "2026-06-20T07:37:25"
 }
